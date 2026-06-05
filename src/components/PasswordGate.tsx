@@ -37,7 +37,7 @@ export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps)
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4" dir={dir}>
       {/* Controls — fixed to top-right physically, never moves with RTL */}
-      <div className="fixed top-4 right-4 flex items-center gap-2">
+      <div className="fixed top-4 right-4 flex items-center gap-2" dir="ltr">
         <button
           onClick={() => setLanguage(isHe ? "en" : "he")}
           className="px-3 py-1 rounded-md text-xs font-semibold border border-border hover:bg-secondary transition-colors bg-background"

@@ -64,7 +64,7 @@ export function Nav() {
         </nav>
 
         {/* Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" dir="ltr">
           {/* Language toggle */}
           <button
             onClick={() => setLanguage(language === "he" ? "en" : "he")}
