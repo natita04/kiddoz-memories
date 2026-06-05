@@ -1,7 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
-
-const client = new Anthropic();
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,20 +8,17 @@ export async function POST(request: NextRequest) {
       return Response.json({ translation: "" });
     }
 
-    const targetLang = from === "he" ? "English" : "Hebrew";
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5-20251001",
-      max_tokens: 1024,
-      messages: [
-        {
-          role: "user",
-          content: `Translate the following text to ${targetLang}. Return only the translation, nothing else, no quotes, no explanation:\n\n${text}`,
-        },
-      ],
-    });
+    const langPair = from === "he" ? "he|en" : "en|he";
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
 
-    const translation =
-      message.content[0].type === "text" ? message.content[0].text.trim() : "";
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const translation: string =
+      data?.responseStatus === 200
+        ? data.responseData.translatedText
+        : "";
+
     return Response.json({ translation });
   } catch (error) {
     console.error("Translation error:", error);
