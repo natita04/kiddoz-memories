@@ -74,6 +74,14 @@
   text-align: right;
 }
 
+/* Use Rubik for all text in Hebrew mode — Playfair Display has no Hebrew glyphs */
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] .font-display {
+  font-family: var(--font-sans);
+}
+
 /* Password gate shake animation */
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
