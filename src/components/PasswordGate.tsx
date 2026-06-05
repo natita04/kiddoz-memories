@@ -102,14 +102,15 @@ export function PasswordGate({ onSuccess, onGuest, error: loadError }: PasswordG
             <p className="mt-3 text-xs text-destructive text-center">{loadError}</p>
           )}
 
-          <div className="mt-4 pt-4 border-t border-border text-center">
-            <button
+          <div className="mt-4 pt-4 border-t border-border">
+            <Button
               type="button"
+              variant="outline"
+              className="w-full"
               onClick={() => { enterAsGuest(); onGuest(); }}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               {isHe ? "כניסה כאורח (צפייה בלבד)" : "Continue as guest (view only)"}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
