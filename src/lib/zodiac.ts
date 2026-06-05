@@ -53,7 +53,11 @@ export function getAgeAtDate(birthdate: string, targetDate: string): string {
 
   let years = target.getFullYear() - birth.getFullYear();
   let months = target.getMonth() - birth.getMonth();
+  const dayDiff = target.getDate() - birth.getDate();
 
+  // Birthday hasn't occurred yet this month — subtract a month
+  if (dayDiff < 0) months--;
+  // Months went negative — borrow a year
   if (months < 0) { years--; months += 12; }
   if (years < 0) return "";
 
