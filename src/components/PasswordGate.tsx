@@ -6,6 +6,7 @@ import { Heart, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authenticate, enterAsGuest } from "@/lib/auth";
+import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface PasswordGateProps {
@@ -20,12 +21,14 @@ export function PasswordGate({ onSuccess, onGuest, error: loadError }: PasswordG
   const [shaking, setShaking] = useState(false);
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, dir } = useLanguage();
+  const { setMode } = useAuth();
 
   const isHe = language === "he";
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (authenticate(password)) {
+      setMode("full");
       onSuccess();
     } else {
       setError(true);
@@ -107,7 +110,7 @@ export function PasswordGate({ onSuccess, onGuest, error: loadError }: PasswordG
               type="button"
               variant="outline"
               className="w-full"
-              onClick={() => { enterAsGuest(); onGuest(); }}
+              onClick={() => { enterAsGuest(); setMode("guest"); onGuest(); }}
             >
               {isHe ? "כניסה כאורח (צפייה בלבד)" : "Continue as guest (view only)"}
             </Button>
