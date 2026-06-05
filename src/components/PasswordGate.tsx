@@ -8,9 +8,10 @@ import { authenticate } from "@/lib/auth";
 
 interface PasswordGateProps {
   onSuccess: () => void;
+  error?: string | null;
 }
 
-export function PasswordGate({ onSuccess }: PasswordGateProps) {
+export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const [shaking, setShaking] = useState(false);
@@ -66,6 +67,10 @@ export function PasswordGate({ onSuccess }: PasswordGateProps) {
               כניסה · Enter
             </Button>
           </form>
+
+          {loadError && (
+            <p className="mt-3 text-xs text-destructive text-center">{loadError}</p>
+          )}
         </div>
       </div>
     </div>
