@@ -61,7 +61,7 @@ export function MemoryFeed({ kidId, initialMemories }: MemoryFeedProps) {
         <h3 className="text-lg font-display font-semibold text-foreground">
           {t("זיכרונות", "Memories")}
           {memories.length > 0 && (
-            <span className="ml-2 text-sm font-sans font-normal text-muted-foreground">
+            <span className="ms-2 text-sm font-sans font-normal text-muted-foreground">
               ({memories.length})
             </span>
           )}
