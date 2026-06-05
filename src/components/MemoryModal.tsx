@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { isHebrew } from "@/lib/zodiac";
+import { PREDEFINED_TAGS } from "@/lib/tags";
 import type { Memory } from "@/types";
 
 interface MemoryModalProps {
@@ -42,6 +43,8 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
   const [date, setDate] = useState(today);
   const [photoPreviews, setPhotoPreviews] = useState<PhotoPreview[]>([]);
   const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [customTag, setCustomTag] = useState("");
   const [saving, setSaving] = useState(false);
   const [translating, setTranslating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,13 +55,16 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
         setStory(memory.story_he ?? memory.story_en ?? "");
         setDate(memory.memory_date);
         setExistingPhotos(memory.photos ?? []);
+        setSelectedTags(memory.tags ?? []);
         setPhotoPreviews([]);
       } else {
         setStory("");
         setDate(today);
         setPhotoPreviews([]);
         setExistingPhotos([]);
+        setSelectedTags([]);
       }
+      setCustomTag("");
       setError(null);
     }
   }, [open, memory]);
@@ -145,11 +151,14 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
       const { story_he, story_en } = await translateStory(story.trim());
       const newPhotoUrls = await uploadPhotos();
       const allPhotos = [...existingPhotos, ...newPhotoUrls];
+      const allTags = customTag.trim()
+        ? [...selectedTags, customTag.trim()]
+        : selectedTags;
 
       if (isEditing && memory) {
         const { data, error } = await supabase
           .from("memories")
-          .update({ story_he, story_en, memory_date: date, photos: allPhotos })
+          .update({ story_he, story_en, memory_date: date, photos: allPhotos, tags: allTags })
           .eq("id", memory.id)
           .select()
           .single();
@@ -158,7 +167,7 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
       } else {
         const { data, error } = await supabase
           .from("memories")
-          .insert({ kid_id: kidId, story_he, story_en, memory_date: date, photos: allPhotos })
+          .insert({ kid_id: kidId, story_he, story_en, memory_date: date, photos: allPhotos, tags: allTags })
           .select()
           .single();
         if (error) throw error;
@@ -209,6 +218,40 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
               value={date}
               onChange={(e) => setDate(e.target.value)}
               max={today}
+            />
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label>{t("תגיות", "Tags")}</Label>
+            <div className="flex flex-wrap gap-2">
+              {PREDEFINED_TAGS.map((tag) => {
+                const active = selectedTags.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() =>
+                      setSelectedTags((prev) =>
+                        active ? prev.filter((t) => t !== tag.id) : [...prev, tag.id]
+                      )
+                    }
+                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                      active
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background border-border text-muted-foreground hover:border-primary/50"
+                    }`}
+                  >
+                    {tag.emoji} {t(tag.he, tag.en)}
+                  </button>
+                );
+              })}
+            </div>
+            <Input
+              placeholder={t("תגית מותאמת אישית...", "Custom tag...")}
+              value={customTag}
+              onChange={(e) => setCustomTag(e.target.value)}
+              className="text-sm h-8"
             />
           </div>
 

@@ -23,4 +23,5 @@ export interface Memory {
   memory_date: string;
   created_at: string;
   photos: string[];
+  tags: string[];
 }

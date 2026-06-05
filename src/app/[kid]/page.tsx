@@ -86,7 +86,7 @@ export default function KidPage() {
       <Nav />
       <main className="container max-w-4xl mx-auto px-4 py-8 space-y-6">
         <KidProfile kid={kid} />
-        <MemoryFeed kidId={kid.id} initialMemories={memories} />
+        <MemoryFeed kidId={kid.id} kidBirthdate={kid.birthdate} initialMemories={memories} />
       </main>
     </div>
   );

@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { MoreHorizontal, Pencil, Trash2, Calendar, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Calendar, X, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { getTagLabel } from "@/lib/tags";
+import { getAgeAtDate } from "@/lib/zodiac";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +18,7 @@ import type { Memory } from "@/types";
 
 interface MemoryCardProps {
   memory: Memory;
+  kidBirthdate: string;
   onEdit: (memory: Memory) => void;
   onDelete: (id: string) => void;
 }
@@ -104,8 +107,9 @@ function Lightbox({
   );
 }
 
-export function MemoryCard({ memory, onEdit, onDelete }: MemoryCardProps) {
+export function MemoryCard({ memory, kidBirthdate, onEdit, onDelete }: MemoryCardProps) {
   const { language, t, dir } = useLanguage();
+  const ageAtMemory = getAgeAtDate(kidBirthdate, memory.memory_date);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -191,10 +195,34 @@ export function MemoryCard({ memory, onEdit, onDelete }: MemoryCardProps) {
             </DropdownMenu>
           </div>
 
-          {/* Date */}
-          <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-border">
-            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-            <time className="text-xs text-muted-foreground">{dateFormatted}</time>
+            {/* Tags */}
+          {memory.tags?.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-3">
+              {memory.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground border border-border"
+                >
+                  {getTagLabel(tag, language)}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Date + age */}
+          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+              <time className="text-xs text-muted-foreground">{dateFormatted}</time>
+            </div>
+            {ageAtMemory && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3 text-muted-foreground/60" />
+                <span className="text-xs text-muted-foreground/60">
+                  {t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </article>

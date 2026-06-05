@@ -46,3 +46,19 @@ export function getAge(birthdate: string): number {
 export function isHebrew(text: string): boolean {
   return /[֐-׿]/.test(text);
 }
+
+export function getAgeAtDate(birthdate: string, targetDate: string): string {
+  const birth = new Date(birthdate);
+  const target = new Date(targetDate);
+
+  let years = target.getFullYear() - birth.getFullYear();
+  let months = target.getMonth() - birth.getMonth();
+
+  if (months < 0) { years--; months += 12; }
+  if (years < 0) return "";
+
+  if (years === 0 && months === 0) return "< 1m";
+  if (years === 0) return `${months}m`;
+  if (months === 0) return `${years}y`;
+  return `${years}y ${months}m`;
+}
