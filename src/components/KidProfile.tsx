@@ -60,9 +60,9 @@ function StatItem({ label, value, emoji }: StatItemProps) {
       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
         {label}
       </span>
-      <span className="text-sm font-semibold text-foreground">
-        {emoji && <span className="mr-1">{emoji}</span>}
-        {value}
+      <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+        {emoji && <span>{emoji}</span>}
+        <span>{value}</span>
       </span>
     </div>
   );
