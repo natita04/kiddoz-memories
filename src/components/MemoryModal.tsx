@@ -18,12 +18,13 @@ import { useLanguage } from "@/context/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { isHebrew } from "@/lib/zodiac";
 import { PREDEFINED_TAGS } from "@/lib/tags";
-import type { Memory } from "@/types";
+import type { Kid, Memory } from "@/types";
 
 interface MemoryModalProps {
   open: boolean;
   onClose: () => void;
   kidId: string;
+  allKids: Kid[];
   memory?: Memory | null;
   onSaved: (memory: Memory) => void;
 }
@@ -35,8 +36,9 @@ interface PhotoPreview {
 
 const today = new Date().toISOString().split("T")[0];
 
-export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryModalProps) {
+export function MemoryModal({ open, onClose, kidId, allKids, memory, onSaved }: MemoryModalProps) {
   const { t, dir } = useLanguage();
+  const otherKids = allKids.filter((k) => k.id !== kidId);
   const isEditing = !!memory;
 
   const [story, setStory] = useState("");
@@ -44,6 +46,7 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
   const [photoPreviews, setPhotoPreviews] = useState<PhotoPreview[]>([]);
   const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sharedKidIds, setSharedKidIds] = useState<string[]>([]);
   const [customTag, setCustomTag] = useState("");
   const [saving, setSaving] = useState(false);
   const [translating, setTranslating] = useState(false);
@@ -56,6 +59,7 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
         setDate(memory.memory_date);
         setExistingPhotos(memory.photos ?? []);
         setSelectedTags(memory.tags ?? []);
+        setSharedKidIds(memory.shared_kid_ids ?? []);
         setPhotoPreviews([]);
       } else {
         setStory("");
@@ -63,6 +67,7 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
         setPhotoPreviews([]);
         setExistingPhotos([]);
         setSelectedTags([]);
+        setSharedKidIds([]);
       }
       setCustomTag("");
       setError(null);
@@ -158,7 +163,7 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
       if (isEditing && memory) {
         const { data, error } = await supabase
           .from("memories")
-          .update({ story_he, story_en, memory_date: date, photos: allPhotos, tags: allTags })
+          .update({ story_he, story_en, memory_date: date, photos: allPhotos, tags: allTags, shared_kid_ids: sharedKidIds })
           .eq("id", memory.id)
           .select()
           .single();
@@ -167,7 +172,7 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
       } else {
         const { data, error } = await supabase
           .from("memories")
-          .insert({ kid_id: kidId, story_he, story_en, memory_date: date, photos: allPhotos, tags: allTags })
+          .insert({ kid_id: kidId, story_he, story_en, memory_date: date, photos: allPhotos, tags: allTags, shared_kid_ids: sharedKidIds })
           .select()
           .single();
         if (error) throw error;
@@ -220,6 +225,33 @@ export function MemoryModal({ open, onClose, kidId, memory, onSaved }: MemoryMod
               max={today}
             />
           </div>
+
+          {/* Share with other kids */}
+          {otherKids.length > 0 && (
+            <div className="space-y-2">
+              <Label>{t("שתף גם עם", "Also involves")}</Label>
+              <div className="flex gap-4">
+                {otherKids.map((ok) => {
+                  const checked = sharedKidIds.includes(ok.id);
+                  return (
+                    <label key={ok.id} className="flex items-center gap-2 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) =>
+                          setSharedKidIds((prev) =>
+                            e.target.checked ? [...prev, ok.id] : prev.filter((id) => id !== ok.id)
+                          )
+                        }
+                        className="accent-primary w-4 h-4"
+                      />
+                      <span className="text-sm font-medium">{t(ok.name_he, ok.name_en)}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Tags */}
           <div className="space-y-2">

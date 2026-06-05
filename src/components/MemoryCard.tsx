@@ -14,11 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
-import type { Memory } from "@/types";
+import type { Kid, Memory } from "@/types";
 
 interface MemoryCardProps {
   memory: Memory;
   kidBirthdate: string;
+  allKids: Kid[];
   onEdit: (memory: Memory) => void;
   onDelete: (id: string) => void;
 }
@@ -107,9 +108,10 @@ function Lightbox({
   );
 }
 
-export function MemoryCard({ memory, kidBirthdate, onEdit, onDelete }: MemoryCardProps) {
+export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: MemoryCardProps) {
   const { language, t, dir } = useLanguage();
   const ageAtMemory = getAgeAtDate(kidBirthdate, memory.memory_date);
+  const sharedWith = allKids.filter((k) => memory.shared_kid_ids?.includes(k.id));
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -206,6 +208,16 @@ export function MemoryCard({ memory, kidBirthdate, onEdit, onDelete }: MemoryCar
                   {getTagLabel(tag, language)}
                 </span>
               ))}
+            </div>
+          )}
+
+          {/* Shared with */}
+          {sharedWith.length > 0 && (
+            <div className="flex items-center gap-1.5 mt-3">
+              <span className="text-xs text-muted-foreground">
+                🤝 {t("גם עם", "Also with")}{" "}
+                {sharedWith.map((k) => t(k.name_he, k.name_en)).join(", ")}
+              </span>
             </div>
           )}
 

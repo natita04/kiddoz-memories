@@ -9,15 +9,16 @@ import { MemoryModal } from "@/components/MemoryModal";
 import { useLanguage } from "@/context/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { PREDEFINED_TAGS, getTagLabel } from "@/lib/tags";
-import type { Memory } from "@/types";
+import type { Kid, Memory } from "@/types";
 
 interface MemoryFeedProps {
   kidId: string;
   kidBirthdate: string;
+  allKids: Kid[];
   initialMemories: Memory[];
 }
 
-export function MemoryFeed({ kidId, kidBirthdate, initialMemories }: MemoryFeedProps) {
+export function MemoryFeed({ kidId, kidBirthdate, allKids, initialMemories }: MemoryFeedProps) {
   const { t, language } = useLanguage();
   const [memories, setMemories] = useState<Memory[]>(initialMemories);
   const [modalOpen, setModalOpen] = useState(false);
@@ -167,6 +168,7 @@ export function MemoryFeed({ kidId, kidBirthdate, initialMemories }: MemoryFeedP
               key={memory.id}
               memory={memory}
               kidBirthdate={kidBirthdate}
+              allKids={allKids}
               onEdit={openEditModal}
               onDelete={handleDelete}
             />
@@ -178,6 +180,7 @@ export function MemoryFeed({ kidId, kidBirthdate, initialMemories }: MemoryFeedP
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditingMemory(null); }}
         kidId={kidId}
+        allKids={allKids}
         memory={editingMemory}
         onSaved={handleSaved}
       />

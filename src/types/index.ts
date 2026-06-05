@@ -24,4 +24,5 @@ export interface Memory {
   created_at: string;
   photos: string[];
   tags: string[];
+  shared_kid_ids: string[];
 }

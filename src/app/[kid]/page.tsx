@@ -16,6 +16,7 @@ export default function KidPage() {
   const slug = params.kid as string;
 
   const [kid, setKid] = useState<Kid | null>(null);
+  const [allKids, setAllKids] = useState<Kid[]>([]);
   const [memories, setMemories] = useState<Memory[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -30,11 +31,11 @@ export default function KidPage() {
 
   async function loadData() {
     setLoading(true);
-    const { data: kidData, error: kidError } = await supabase
-      .from("kids")
-      .select("*")
-      .eq("slug", slug)
-      .single();
+
+    const [{ data: kidData, error: kidError }, { data: kidsData }] = await Promise.all([
+      supabase.from("kids").select("*").eq("slug", slug).single(),
+      supabase.from("kids").select("*").order("order"),
+    ]);
 
     if (kidError || !kidData) {
       setNotFound(true);
@@ -45,10 +46,11 @@ export default function KidPage() {
     const { data: memoriesData } = await supabase
       .from("memories")
       .select("*")
-      .eq("kid_id", kidData.id)
+      .or(`kid_id.eq.${kidData.id},shared_kid_ids.cs.{${kidData.id}}`)
       .order("memory_date", { ascending: false });
 
     setKid(kidData as Kid);
+    setAllKids((kidsData as Kid[]) ?? []);
     setMemories((memoriesData as Memory[]) ?? []);
     setLoading(false);
   }
@@ -86,7 +88,12 @@ export default function KidPage() {
       <Nav />
       <main className="container max-w-4xl mx-auto px-4 py-8 space-y-6">
         <KidProfile kid={kid} />
-        <MemoryFeed kidId={kid.id} kidBirthdate={kid.birthdate} initialMemories={memories} />
+        <MemoryFeed
+          kidId={kid.id}
+          kidBirthdate={kid.birthdate}
+          allKids={allKids}
+          initialMemories={memories}
+        />
       </main>
     </div>
   );
