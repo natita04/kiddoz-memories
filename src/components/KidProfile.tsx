@@ -2,7 +2,8 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Camera, Loader2 } from "lucide-react";
+import { Camera, Loader2, Pencil } from "lucide-react";
+import { KidEditModal } from "@/components/KidEditModal";
 import { useLanguage } from "@/context/LanguageContext";
 import { getAge, getZodiacSign } from "@/lib/zodiac";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -70,13 +71,15 @@ function StatItem({ label, value, emoji }: StatItemProps) {
 
 export function KidProfile({ kid }: KidProfileProps) {
   const { t, language, dir } = useLanguage();
-  const age = getAge(kid.birthdate);
-  const zodiac = getZodiacSign(kid.birthdate);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [kidData, setKidData] = useState(kid);
   const [photoUrl, setPhotoUrl] = useState(kid.profile_photo_url);
   const [uploading, setUploading] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const age = getAge(kidData.birthdate);
+  const zodiac = getZodiacSign(kidData.birthdate);
 
-  const birthFormatted = new Date(kid.birthdate).toLocaleDateString(
+  const birthFormatted = new Date(kidData.birthdate).toLocaleDateString(
     language === "he" ? "he-IL" : "en-US",
     { day: "numeric", month: "long", year: "numeric" }
   );
@@ -159,21 +162,39 @@ export function KidProfile({ kid }: KidProfileProps) {
 
       {/* Info */}
       <div className="flex-1" dir={dir}>
-        <h2 className="text-2xl font-display font-bold text-foreground mb-1">
-          {t(kid.name_he, kid.name_en)}
-        </h2>
-        <p className="text-muted-foreground text-sm mb-4">
-          {t(kid.gender === "m" ? `בן ${age}` : `בת ${age}`, `Age ${age}`)}
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h2 className="text-2xl font-display font-bold text-foreground mb-1">
+              {t(kidData.name_he, kidData.name_en)}
+            </h2>
+            <p className="text-muted-foreground text-sm mb-4">
+              {t(kidData.gender === "m" ? `בן ${age}` : `בת ${age}`, `Age ${age}`)}
+            </p>
+          </div>
+          <button
+            onClick={() => setEditOpen(true)}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            title={t("עריכת פרטים", "Edit details")}
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+        </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           <StatItem label={t("יום הולדת", "Birthday")} value={birthFormatted} emoji="🎂" />
           <StatItem label={t("גיל", "Age")} value={t(`${age} שנים`, `${age} years old`)} emoji="🌟" />
           <StatItem label={t("מזל", "Star sign")} value={`${zodiac.emoji} ${t(zodiac.he, zodiac.en)}`} />
-          <StatItem label={t("אוכל אהוב", "Favorite food")} value={t(kid.favorite_food_he, kid.favorite_food_en)} emoji={foodEmoji(kid.favorite_food_he, kid.favorite_food_en)} />
-          <StatItem label={t("צבע אהוב", "Favorite color")} value={t(kid.favorite_color_he, kid.favorite_color_en)} emoji={colorEmoji(kid.favorite_color_he, kid.favorite_color_en)} />
+          <StatItem label={t("אוכל אהוב", "Favorite food")} value={t(kidData.favorite_food_he, kidData.favorite_food_en)} emoji={foodEmoji(kidData.favorite_food_he, kidData.favorite_food_en)} />
+          <StatItem label={t("צבע אהוב", "Favorite color")} value={t(kidData.favorite_color_he, kidData.favorite_color_en)} emoji={colorEmoji(kidData.favorite_color_he, kidData.favorite_color_en)} />
         </div>
       </div>
+
+      <KidEditModal
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        kid={kidData}
+        onSaved={(updated) => setKidData(updated)}
+      />
     </div>
   );
 }
