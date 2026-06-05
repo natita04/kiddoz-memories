@@ -164,8 +164,8 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
           style={{
             flex: 1,
             padding: dir === "rtl"
-              ? (hasPhotos ? "20px 18px 18px 44px" : "24px 18px 18px 44px")
-              : (hasPhotos ? "20px 44px 18px 18px" : "24px 44px 18px 18px"),
+              ? (hasPhotos ? "20px 18px 18px 56px" : "24px 18px 18px 56px")
+              : (hasPhotos ? "20px 56px 18px 18px" : "24px 56px 18px 18px"),
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
@@ -180,11 +180,19 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
             </p>
           )}
 
-          {/* Footer */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
+          {/* Footer — dir on the row so flex-direction reverses for RTL,
+               first child (date) ends up on left in RTL, tags on right */}
+          <div dir={dir} style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
             marginTop: 14, paddingTop: 14, borderTop: "1px solid #EFE7DE", gap: 12, flexWrap: "wrap" }}>
-            {/* Tags */}
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", flex: 1, justifyContent: dir === "rtl" ? "flex-end" : "flex-start" }}>
+            {/* Date + age — first in DOM → physical RIGHT in RTL, LEFT in LTR */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10,
+              fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+              color: "#8E869C", whiteSpace: "nowrap", flexShrink: 0 }}>
+              <span>📅 {dateFormatted}</span>
+              {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
+            </div>
+            {/* Tags — second in DOM → physical LEFT in RTL, RIGHT in LTR */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {memory.tags?.map((tagId) => {
                 const tagDef = PREDEFINED_TAGS.find((t) => t.id === tagId);
                 const label = getTagLabel(tagId, language);
@@ -209,13 +217,6 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
               )}
             </div>
 
-            {/* Date + age */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10,
-              fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
-              color: "#8E869C", whiteSpace: "nowrap", flexShrink: 0 }}>
-              <span>📅 {dateFormatted}</span>
-              {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
-            </div>
           </div>
         </div>
 
