@@ -1,15 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { PlusCircle, Search, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { X } from "lucide-react";
 import { MemoryCard } from "@/components/MemoryCard";
 import { MemoryModal } from "@/components/MemoryModal";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { PREDEFINED_TAGS, getTagLabel } from "@/lib/tags";
+import { getKidColors } from "@/lib/kidColors";
 import type { Kid, Memory } from "@/types";
 
 interface MemoryFeedProps {
@@ -17,18 +16,25 @@ interface MemoryFeedProps {
   kidBirthdate: string;
   allKids: Kid[];
   initialMemories: Memory[];
+  kidOrder: number;
 }
 
-export function MemoryFeed({ kidId, kidBirthdate, allKids, initialMemories }: MemoryFeedProps) {
+export function MemoryFeed({
+  kidId,
+  kidBirthdate,
+  allKids,
+  initialMemories,
+  kidOrder,
+}: MemoryFeedProps) {
   const { t, language } = useLanguage();
   const { isGuest } = useAuth();
+  const kidColors = getKidColors(kidOrder);
   const [memories, setMemories] = useState<Memory[]>(initialMemories);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
-  // Tags that actually appear in this kid's memories
   const availableTags = useMemo(() => {
     const seen = new Set<string>();
     memories.forEach((m) => m.tags?.forEach((t) => seen.add(t)));
@@ -64,7 +70,8 @@ export function MemoryFeed({ kidId, kidBirthdate, allKids, initialMemories }: Me
       const exists = prev.find((m) => m.id === saved.id);
       if (exists) return prev.map((m) => (m.id === saved.id ? saved : m));
       return [saved, ...prev].sort(
-        (a, b) => new Date(b.memory_date).getTime() - new Date(a.memory_date).getTime()
+        (a, b) =>
+          new Date(b.memory_date).getTime() - new Date(a.memory_date).getTime()
       );
     });
   }
@@ -80,60 +87,143 @@ export function MemoryFeed({ kidId, kidBirthdate, allKids, initialMemories }: Me
     <section>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-display font-semibold text-foreground">
-          {t("זיכרונות", "Memories")}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+          <h3
+            className="font-display"
+            style={{ margin: 0, fontSize: 24, color: "#4B4358" }}
+          >
+            {t("זיכרונות", "Memories")}
+          </h3>
           {memories.length > 0 && (
-            <span className="ms-2 text-sm font-sans font-normal text-muted-foreground">
-              ({memories.length})
+            <span
+              className="font-round"
+              style={{ fontSize: 16, color: "#8E869C" }}
+            >
+              {memories.length}
             </span>
           )}
-        </h3>
+        </div>
         {!isGuest && (
-          <Button onClick={openAddModal} size="sm">
-            <PlusCircle className="h-4 w-4 me-1.5" />
+          <button
+            onClick={openAddModal}
+            className="font-round"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "11px 18px",
+              borderRadius: 99,
+              border: "none",
+              cursor: "pointer",
+              color: "#fff",
+              fontSize: 15,
+              background: kidColors.deep,
+              boxShadow: `0 6px 16px ${kidColors.mid}`,
+            }}
+          >
+            <span style={{ fontSize: 17 }}>＋</span>
             {t("זיכרון חדש", "Add memory")}
-          </Button>
+          </button>
         )}
       </div>
 
       {/* Search + tag filters */}
       {memories.length > 0 && (
-        <div className="space-y-2 mb-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+          {/* Search bar */}
+          <div style={{ position: "relative" }}>
+            <span
+              style={{
+                position: "absolute",
+                right: 14,
+                top: "50%",
+                transform: "translateY(-50%)",
+                fontSize: 16,
+                color: "#8E869C",
+                pointerEvents: "none",
+              }}
+            >
+              🔍
+            </span>
+            <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t("חיפוש בזיכרונות...", "Search memories...")}
-              className="ps-9 pe-9"
+              style={{
+                width: "100%",
+                padding: "12px 44px 12px 36px",
+                background: "#fff",
+                borderRadius: 16,
+                border: "1px solid #EFE7DE",
+                fontFamily: "var(--font-sans, Rubik, sans-serif)",
+                fontSize: 14,
+                color: "#4B4358",
+                outline: "none",
+                boxSizing: "border-box",
+                direction: "rtl",
+              }}
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute end-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                style={{
+                  position: "absolute",
+                  left: 12,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "#8E869C",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 2,
+                }}
               >
                 <X className="h-4 w-4" />
               </button>
             )}
           </div>
 
-          {/* Tag filters — only shown if any memories have tags */}
+          {/* Tag filter pills */}
           {availableTags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {availableTags.map((tag) => {
-                const isActive = activeTag === tag;
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {availableTags.map((tagId) => {
+                const isActive = activeTag === tagId;
+                const tagDef = PREDEFINED_TAGS.find((t) => t.id === tagId);
+                const label = getTagLabel(tagId, language);
                 return (
                   <button
-                    key={tag}
-                    onClick={() => setActiveTag(isActive ? null : tag)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                      isActive
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-border text-muted-foreground hover:border-primary/50"
-                    }`}
+                    key={tagId}
+                    onClick={() => setActiveTag(isActive ? null : tagId)}
+                    className="font-round"
+                    style={
+                      isActive && tagDef
+                        ? {
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 5,
+                            padding: "7px 14px",
+                            borderRadius: 99,
+                            fontSize: 13.5,
+                            background: tagDef.colors.soft,
+                            color: tagDef.colors.deep,
+                            border: `1.5px solid ${tagDef.colors.mid}`,
+                            cursor: "pointer",
+                          }
+                        : {
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 5,
+                            padding: "7px 14px",
+                            borderRadius: 99,
+                            fontSize: 13.5,
+                            background: "#fff",
+                            color: "#8E869C",
+                            border: "1.5px solid #EFE7DE",
+                            cursor: "pointer",
+                          }
+                    }
                   >
-                    {getTagLabel(tag, language)}
+                    {label}
                   </button>
                 );
               })}
@@ -144,31 +234,72 @@ export function MemoryFeed({ kidId, kidBirthdate, allKids, initialMemories }: Me
 
       {/* Empty / no-results states */}
       {memories.length === 0 ? (
-        <div className="text-center py-16 bg-card rounded-lg border border-dashed border-border">
-          <div className="text-4xl mb-3">📷</div>
-          <p className="text-muted-foreground text-sm">
-            {t("עדיין אין זיכרונות. הוסיפו את הראשון!", "No memories yet. Add the first one!")}
+        <div
+          style={{
+            textAlign: "center",
+            padding: "64px 24px",
+            background: "#fff",
+            borderRadius: 24,
+            border: "2px dashed #EFE7DE",
+          }}
+        >
+          <div style={{ fontSize: 40, marginBottom: 12 }}>📷</div>
+          <p
+            className="font-round"
+            style={{ color: "#8E869C", fontSize: 14, margin: 0 }}
+          >
+            {t(
+              "עדיין אין זיכרונות. הוסיפו את הראשון!",
+              "No memories yet. Add the first one!"
+            )}
           </p>
           {!isGuest && (
-            <Button onClick={openAddModal} variant="outline" size="sm" className="mt-4">
+            <button
+              onClick={openAddModal}
+              className="font-round"
+              style={{
+                marginTop: 16,
+                padding: "10px 22px",
+                borderRadius: 99,
+                border: "1.5px solid #EFE7DE",
+                background: "#fff",
+                color: "#8E869C",
+                fontSize: 14,
+                cursor: "pointer",
+              }}
+            >
               {t("הוסיפו זיכרון", "Add a memory")}
-            </Button>
+            </button>
           )}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground text-sm">
-          {t("לא נמצאו זיכרונות", "No memories found")}
+        <div style={{ textAlign: "center", padding: "48px 0" }}>
+          <p className="font-round" style={{ color: "#8E869C", fontSize: 14, margin: 0 }}>
+            {t("לא נמצאו זיכרונות", "No memories found")}
+          </p>
           {hasFilters && (
             <button
-              onClick={() => { setSearchQuery(""); setActiveTag(null); }}
-              className="block mx-auto mt-2 text-primary text-xs hover:underline"
+              onClick={() => {
+                setSearchQuery("");
+                setActiveTag(null);
+              }}
+              className="font-round"
+              style={{
+                marginTop: 8,
+                background: "none",
+                border: "none",
+                color: kidColors.deep,
+                fontSize: 13,
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
             >
               {t("נקה סינון", "Clear filters")}
             </button>
           )}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           {filtered.map((memory) => (
             <MemoryCard
               key={memory.id}
@@ -184,7 +315,10 @@ export function MemoryFeed({ kidId, kidBirthdate, allKids, initialMemories }: Me
 
       <MemoryModal
         open={modalOpen}
-        onClose={() => { setModalOpen(false); setEditingMemory(null); }}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingMemory(null);
+        }}
         kidId={kidId}
         allKids={allKids}
         memory={editingMemory}

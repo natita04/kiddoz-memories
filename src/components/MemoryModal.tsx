@@ -2,18 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { ImagePlus, Loader2, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { useLanguage } from "@/context/LanguageContext";
 import { supabase } from "@/lib/supabase";
 import { isHebrew } from "@/lib/zodiac";
@@ -36,7 +31,37 @@ interface PhotoPreview {
 
 const today = new Date().toISOString().split("T")[0];
 
-export function MemoryModal({ open, onClose, kidId, allKids, memory, onSaved }: MemoryModalProps) {
+const fieldStyle: React.CSSProperties = {
+  width: "100%",
+  padding: "13px 16px",
+  borderRadius: 14,
+  fontFamily: "var(--font-sans, Rubik, sans-serif)",
+  fontSize: 15,
+  color: "#4B4358",
+  background: "#FAFAF8",
+  outline: "none",
+  border: "1.5px solid #EFE7DE",
+  direction: "rtl",
+  resize: "none",
+  boxSizing: "border-box" as const,
+};
+
+const labelStyle: React.CSSProperties = {
+  fontFamily: "var(--font-round, sans-serif)",
+  fontSize: 13.5,
+  color: "#8E869C",
+  display: "block",
+  marginBottom: 8,
+};
+
+export function MemoryModal({
+  open,
+  onClose,
+  kidId,
+  allKids,
+  memory,
+  onSaved,
+}: MemoryModalProps) {
   const { t, dir } = useLanguage();
   const otherKids = allKids.filter((k) => k.id !== kidId);
   const isEditing = !!memory;
@@ -111,12 +136,16 @@ export function MemoryModal({ open, onClose, kidId, allKids, memory, onSaved }: 
     const urls: string[] = [];
     for (const { file } of photoPreviews) {
       const ext = file.name.split(".").pop();
-      const path = `${kidId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const path = `${kidId}/${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}.${ext}`;
       const { error } = await supabase.storage
         .from("memory-photos")
         .upload(path, file, { cacheControl: "3600", upsert: false });
       if (error) throw error;
-      const { data } = supabase.storage.from("memory-photos").getPublicUrl(path);
+      const { data } = supabase.storage
+        .from("memory-photos")
+        .getPublicUrl(path);
       urls.push(data.publicUrl);
     }
     return urls;
@@ -163,7 +192,14 @@ export function MemoryModal({ open, onClose, kidId, allKids, memory, onSaved }: 
       if (isEditing && memory) {
         const { data, error } = await supabase
           .from("memories")
-          .update({ story_he, story_en, memory_date: date, photos: allPhotos, tags: allTags, shared_kid_ids: sharedKidIds })
+          .update({
+            story_he,
+            story_en,
+            memory_date: date,
+            photos: allPhotos,
+            tags: allTags,
+            shared_kid_ids: sharedKidIds,
+          })
           .eq("id", memory.id)
           .select()
           .single();
@@ -172,7 +208,15 @@ export function MemoryModal({ open, onClose, kidId, allKids, memory, onSaved }: 
       } else {
         const { data, error } = await supabase
           .from("memories")
-          .insert({ kid_id: kidId, story_he, story_en, memory_date: date, photos: allPhotos, tags: allTags, shared_kid_ids: sharedKidIds })
+          .insert({
+            kid_id: kidId,
+            story_he,
+            story_en,
+            memory_date: date,
+            photos: allPhotos,
+            tags: allTags,
+            shared_kid_ids: sharedKidIds,
+          })
           .select()
           .single();
         if (error) throw error;
@@ -192,71 +236,136 @@ export function MemoryModal({ open, onClose, kidId, allKids, memory, onSaved }: 
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? t("עריכת זיכרון", "Edit memory") : t("זיכרון חדש", "Add a memory")}
+      <DialogContent
+        className="max-h-[90vh] overflow-y-auto p-0"
+        style={{
+          maxWidth: 580,
+          borderRadius: 28,
+          boxShadow: "0 20px 60px rgba(75,67,88,0.22)",
+          overflow: "hidden",
+        }}
+      >
+        {/* Header */}
+        <DialogHeader
+          style={{
+            padding: "22px 26px 0",
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <DialogTitle
+            className="font-display"
+            style={{ margin: 0, fontSize: 22, color: "#4B4358" }}
+          >
+            {isEditing
+              ? t("עריכת זיכרון", "Edit memory")
+              : t("זיכרון חדש", "New memory")}
           </DialogTitle>
         </DialogHeader>
 
-        <form id="memory-form" onSubmit={handleSubmit} className="space-y-4 px-6 pb-2">
+        <form
+          id="memory-form"
+          onSubmit={handleSubmit}
+          style={{
+            padding: "20px 26px 28px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 20,
+          }}
+          dir={dir}
+        >
           {/* Story */}
-          <div className="space-y-1.5">
-            <Label htmlFor="story">{t("הסיפור", "Story")}</Label>
-            <Textarea
-              id="story"
+          <div>
+            <label style={labelStyle}>{t("הסיפור", "Story")}</label>
+            <textarea
+              rows={4}
               value={story}
               onChange={(e) => setStory(e.target.value)}
               placeholder={t("מה קרה? מה אמר/ה?", "What happened? What did they say?")}
-              className="min-h-[120px] resize-none"
-              dir={dir}
+              style={{
+                ...fieldStyle,
+                border: "1.5px solid #F7BD9C",
+                boxShadow: "0 0 0 3px #FCE3D5",
+              }}
               autoFocus
             />
           </div>
 
-          {/* Date */}
-          <div className="space-y-1.5">
-            <Label htmlFor="date">{t("תאריך", "Date")}</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              max={today}
-            />
+          {/* Date + share row */}
+          <div style={{ display: "flex", gap: 16 }}>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>{t("תאריך", "Date")}</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                max={today}
+                style={fieldStyle}
+              />
+            </div>
+
+            {otherKids.length > 0 && (
+              <div style={{ flex: 1 }}>
+                <label style={labelStyle}>{t("שתף גם עם", "Also involves")}</label>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    padding: "10px 14px",
+                    background: "#FAFAF8",
+                    borderRadius: 14,
+                    border: "1.5px solid #EFE7DE",
+                  }}
+                >
+                  {otherKids.map((ok) => {
+                    const checked = sharedKidIds.includes(ok.id);
+                    return (
+                      <label
+                        key={ok.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={(e) =>
+                            setSharedKidIds((prev) =>
+                              e.target.checked
+                                ? [...prev, ok.id]
+                                : prev.filter((id) => id !== ok.id)
+                            )
+                          }
+                          style={{
+                            width: 18,
+                            height: 18,
+                            accentColor: "#E07F52",
+                          }}
+                        />
+                        <span
+                          className="font-round"
+                          style={{ fontSize: 14, color: "#4B4358" }}
+                        >
+                          {t(ok.name_he, ok.name_en)}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Share with other kids */}
-          {otherKids.length > 0 && (
-            <div className="space-y-2">
-              <Label>{t("שתף גם עם", "Also involves")}</Label>
-              <div className="flex gap-4">
-                {otherKids.map((ok) => {
-                  const checked = sharedKidIds.includes(ok.id);
-                  return (
-                    <label key={ok.id} className="flex items-center gap-2 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={(e) =>
-                          setSharedKidIds((prev) =>
-                            e.target.checked ? [...prev, ok.id] : prev.filter((id) => id !== ok.id)
-                          )
-                        }
-                        className="accent-primary w-4 h-4"
-                      />
-                      <span className="text-sm font-medium">{t(ok.name_he, ok.name_en)}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
           {/* Tags */}
-          <div className="space-y-2">
-            <Label>{t("תגיות", "Tags")}</Label>
-            <div className="flex flex-wrap gap-2">
+          <div>
+            <label style={labelStyle}>{t("תגיות", "Tags")}</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
               {PREDEFINED_TAGS.map((tag) => {
                 const active = selectedTags.includes(tag.id);
                 return (
@@ -265,42 +374,98 @@ export function MemoryModal({ open, onClose, kidId, allKids, memory, onSaved }: 
                     type="button"
                     onClick={() =>
                       setSelectedTags((prev) =>
-                        active ? prev.filter((t) => t !== tag.id) : [...prev, tag.id]
+                        active
+                          ? prev.filter((t) => t !== tag.id)
+                          : [...prev, tag.id]
                       )
                     }
-                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                    className="font-round"
+                    style={
                       active
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-border text-muted-foreground hover:border-primary/50"
-                    }`}
+                        ? {
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            padding: "7px 14px",
+                            borderRadius: 99,
+                            fontSize: 13.5,
+                            cursor: "pointer",
+                            background: tag.colors.soft,
+                            color: tag.colors.deep,
+                            border: `1.5px solid ${tag.colors.mid}`,
+                          }
+                        : {
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 6,
+                            padding: "7px 14px",
+                            borderRadius: 99,
+                            fontSize: 13.5,
+                            cursor: "pointer",
+                            background: "#FAFAF8",
+                            color: "#8E869C",
+                            border: "1.5px solid #EFE7DE",
+                          }
+                    }
                   >
-                    {tag.emoji} {t(tag.he, tag.en)}
+                    <span>{tag.emoji}</span>
+                    {t(tag.he, tag.en)}
                   </button>
                 );
               })}
             </div>
-            <Input
+            <input
               placeholder={t("תגית מותאמת אישית...", "Custom tag...")}
               value={customTag}
               onChange={(e) => setCustomTag(e.target.value)}
-              className="text-sm h-8"
+              style={{ ...fieldStyle, marginTop: 10 }}
             />
           </div>
 
           {/* Photos */}
-          <div className="space-y-2">
-            <Label>{t(`תמונות (${totalPhotos}/5)`, `Photos (${totalPhotos}/5)`)}</Label>
+          <div>
+            <label style={labelStyle}>
+              {t(`תמונות (${totalPhotos}/5)`, `Photos (${totalPhotos}/5)`)}
+            </label>
 
-            {/* Existing photos */}
             {existingPhotos.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div
+                style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}
+              >
                 {existingPhotos.map((url) => (
-                  <div key={url} className="relative group w-16 h-16 rounded-md overflow-hidden border border-border">
-                    <img src={url} alt="" className="w-full h-full object-cover" />
+                  <div
+                    key={url}
+                    style={{
+                      position: "relative",
+                      width: 64,
+                      height: 64,
+                      borderRadius: 10,
+                      overflow: "hidden",
+                      border: "1px solid #EFE7DE",
+                    }}
+                    className="group"
+                  >
+                    <img
+                      src={url}
+                      alt=""
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
                     <button
                       type="button"
                       onClick={() => removeExistingPhoto(url)}
-                      className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "rgba(0,0,0,0.5)",
+                        opacity: 0,
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "opacity 0.15s",
+                      }}
+                      className="group-hover:opacity-100"
                     >
                       <X className="w-4 h-4 text-white" />
                     </button>
@@ -309,16 +474,44 @@ export function MemoryModal({ open, onClose, kidId, allKids, memory, onSaved }: 
               </div>
             )}
 
-            {/* New photo previews */}
             {photoPreviews.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div
+                style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}
+              >
                 {photoPreviews.map((p, i) => (
-                  <div key={p.preview} className="relative group w-16 h-16 rounded-md overflow-hidden border border-border">
-                    <img src={p.preview} alt="" className="w-full h-full object-cover" />
+                  <div
+                    key={p.preview}
+                    style={{
+                      position: "relative",
+                      width: 64,
+                      height: 64,
+                      borderRadius: 10,
+                      overflow: "hidden",
+                      border: "1px solid #EFE7DE",
+                    }}
+                    className="group"
+                  >
+                    <img
+                      src={p.preview}
+                      alt=""
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
                     <button
                       type="button"
                       onClick={() => removeNewPhoto(i)}
-                      className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: "rgba(0,0,0,0.5)",
+                        opacity: 0,
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "opacity 0.15s",
+                      }}
+                      className="group-hover:opacity-100"
                     >
                       <X className="w-4 h-4 text-white" />
                     </button>
@@ -327,52 +520,110 @@ export function MemoryModal({ open, onClose, kidId, allKids, memory, onSaved }: 
               </div>
             )}
 
-            {/* Dropzone */}
             {totalPhotos < 5 && (
               <div
                 {...getRootProps()}
-                className={`border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors ${
-                  isDragActive
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary/50 hover:bg-secondary/50"
-                }`}
+                style={{
+                  border: `2px dashed ${isDragActive ? "#F7BD9C" : "#EFE7DE"}`,
+                  borderRadius: 18,
+                  padding: "28px 20px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 10,
+                  cursor: "pointer",
+                  background: isDragActive ? "#FCE3D5" : "#FAFAF8",
+                  transition: "background 0.15s, border-color 0.15s",
+                }}
               >
                 <input {...getInputProps()} />
-                <ImagePlus className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">
-                  {isDragActive
-                    ? t("שחרר כאן", "Drop here")
-                    : t("גרור תמונות או לחץ לבחירה", "Drag photos or click to select")}
-                </p>
-                <p className="text-xs text-muted-foreground/60 mt-0.5">
-                  {t("עד 5MB לתמונה", "Up to 5MB per photo")}
-                </p>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 14,
+                    background: "#FCE3D5",
+                    display: "grid",
+                    placeItems: "center",
+                    fontSize: 24,
+                  }}
+                >
+                  🖼️
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    className="font-round"
+                    style={{ fontSize: 14.5, color: "#4B4358" }}
+                  >
+                    {isDragActive
+                      ? t("שחרר כאן", "Drop here")
+                      : t("גרור תמונות או לחץ לבחירה", "Drag photos or click to select")}
+                  </div>
+                  <div
+                    className="font-round"
+                    style={{ fontSize: 12.5, color: "#8E869C", marginTop: 4 }}
+                  >
+                    {t("עד 5 תמונות · עד 5MB לתמונה", "Up to 5 photos · 5MB each")}
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
-        </form>
+          {error && (
+            <p style={{ fontSize: 14, color: "#DC2626", margin: 0 }}>{error}</p>
+          )}
 
-        <DialogFooter className="px-6">
-          <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
-            {t("ביטול", "Cancel")}
-          </Button>
-          <Button
-            type="submit"
-            form="memory-form"
-            disabled={saving || translating}
-          >
-            {(saving || translating) && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            {translating
-              ? t("מתרגם...", "Translating...")
-              : saving
-              ? t("שומר...", "Saving...")
-              : isEditing
-              ? t("שמירה", "Save")
-              : t("הוספה", "Add")}
-          </Button>
-        </DialogFooter>
+          {/* Actions */}
+          <div style={{ display: "flex", gap: 12 }}>
+            <button
+              type="submit"
+              disabled={saving || translating}
+              className="font-round"
+              style={{
+                padding: "12px 28px",
+                borderRadius: 99,
+                border: "none",
+                cursor: saving || translating ? "not-allowed" : "pointer",
+                background: saving || translating ? "#F7BD9C" : "#E07F52",
+                color: "#fff",
+                fontSize: 15,
+                boxShadow: "0 6px 16px #F7BD9C",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              {(saving || translating) && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              {translating
+                ? t("מתרגם...", "Translating...")
+                : saving
+                ? t("שומר...", "Saving...")
+                : isEditing
+                ? t("שמירה", "Save")
+                : t("הוספה", "Add")}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="font-round"
+              style={{
+                padding: "12px 22px",
+                borderRadius: 99,
+                cursor: "pointer",
+                background: "transparent",
+                color: "#8E869C",
+                fontSize: 15,
+                border: "1.5px solid #EFE7DE",
+              }}
+            >
+              {t("ביטול", "Cancel")}
+            </button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

@@ -48,6 +48,37 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Moments pastel families
+        mint: {
+          soft: "#DCF1E8",
+          mid: "#9FDCC1",
+          deep: "#3F9E78",
+        },
+        peach: {
+          soft: "#FCE3D5",
+          mid: "#F7BD9C",
+          deep: "#E07F52",
+        },
+        lav: {
+          soft: "#EDE7FB",
+          mid: "#CBB8F2",
+          deep: "#7E5BC9",
+        },
+        sky: {
+          soft: "#E0EEFB",
+          mid: "#A9D0F4",
+          deep: "#3E7FC4",
+        },
+        rose: {
+          soft: "#FBE2EC",
+          mid: "#F2B2CC",
+          deep: "#D2638E",
+        },
+        // Moments neutrals
+        cream: "#FBF6F0",
+        ink: "#4B4358",
+        "ink-soft": "#8E869C",
+        line: "#EFE7DE",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -55,14 +86,15 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        display: ["var(--font-display)", "Georgia", "serif"],
+        display: ["var(--font-display)", "sans-serif"],
+        round: ["var(--font-round)", "sans-serif"],
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        card: "0 4px 16px rgba(28,25,23,0.06)",
-        "card-hover": "0 8px 24px rgba(28,25,23,0.10)",
-        modal: "0 24px 48px rgba(28,25,23,0.12)",
-        "primary-glow": "0 4px 12px rgba(194,65,12,0.25)",
+        card: "0 6px 22px rgba(75,67,88,0.08)",
+        "card-hover": "0 10px 32px rgba(75,67,88,0.12)",
+        modal: "0 20px 60px rgba(75,67,88,0.22)",
+        "primary-glow": "0 6px 16px #F7BD9C",
       },
       keyframes: {
         "accordion-down": {

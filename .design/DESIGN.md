@@ -1,48 +1,74 @@
-# Ember Studio
-Source: https://designmd.ai/chef/ember-studio
-
-## Overview
-A warm, craft-focused design system for creative project management tools. The aesthetic blends terracotta warmth with modern minimalism — soft earth tones anchor the interface while amber accents draw attention to actions and progress. Designed for teams that value aesthetics alongside productivity. Both light and dark modes feel intentional, not just inverted. The overall mood is calm, focused, and subtly luxurious.
+# Moments Design System
+A playful, warm family scrapbook aesthetic. Soft pastels on cream — each child gets their own color family, creating a personal, joyful feel.
 
 ## Colors
-- **Primary** (#C2410C): Terracotta — CTAs, active states, links, focus rings, progress indicators
-- **Primary Hover** (#9A3412): Burnt sienna — hover states on primary elements
-- **Accent** (#F59E0B): Amber — notifications, badges, highlights, new-item indicators
-- **Neutral** (#78716C): Stone — muted text, placeholders, timestamps, metadata
-- **Background** (#FAFAF9): Warm white page background with a hint of cream
-- **Surface** (#F5F5F4): Cards, panels, modals — slightly warm off-white
-- **Surface Raised** (#E7E5E4): Hover states, selected rows, active tabs
-- **Text Primary** (#1C1917): Warm near-black — headings, body text, primary labels
-- **Text Secondary** (#57534E): Warm gray — descriptions, captions, secondary info
-- **Border** (#D6D3D1): Warm gray borders — card edges, dividers, input borders
-- **Success** (#16A34A): Completed tasks, approved items, positive states
-- **Warning** (#D97706): Due soon, needs attention, caution banners
-- **Error** (#DC2626): Overdue, failed, destructive actions
+
+### Neutrals
+- **Cream** (#FBF6F0): Page background — warm, paper-like
+- **Card** (#FFFFFF): Card surfaces
+- **Ink** (#4B4358): Primary text — soft plum-charcoal
+- **InkSoft** (#8E869C): Secondary text, labels, placeholders
+- **Line** (#EFE7DE): Borders, dividers, hairlines
+
+### Pastel Families (kid color assignment by `order` field)
+Each family has three weights: soft (fill/bg), mid (border/ring), deep (text/accent).
+
+| Family | Soft       | Mid        | Deep       | Assigned to |
+|--------|-----------|-----------|-----------|-------------|
+| Mint   | #DCF1E8   | #9FDCC1   | #3F9E78   | order 1     |
+| Peach  | #FCE3D5   | #F7BD9C   | #E07F52   | order 2     |
+| Sky    | #E0EEFB   | #A9D0F4   | #3E7FC4   | order 3     |
+| Lav    | #EDE7FB   | #CBB8F2   | #7E5BC9   | order 4     |
+| Rose   | #FBE2EC   | #F2B2CC   | #D2638E   | order 5     |
+
+### Tag Colors
+- funny → Mint | sweet → Peach | first-time → Sky | milestone → Lav | proud-moment → Rose
 
 ## Typography
-- **Display Font**: Playfair Display — loaded via next/font/google
-- **Body Font**: Rubik (latin + hebrew subsets) — loaded via next/font/google
-  - Rubik chosen over Source Sans 3 for full Hebrew script support
+- **Display**: Secular One (weight 400) — chunky playful headers, full Hebrew support
+- **Round**: Varela Round (weight 400) — cute UI labels, buttons, pills
+- **Body**: Rubik (latin + hebrew) — body text, inputs, running text
 
-Display and heading text uses Playfair Display at bold weight with tight letter spacing. Body and UI text uses Rubik at regular (400) and semibold (600) weights.
+### Usage
+- `font-display` (`--font-display`): h1/h2/h3, logo, kid name in profile hero
+- `font-round` (`--font-round`): labels, pills, tags, buttons, nav items, stats
+- `font-sans` / `--font-sans`: body text, story text in memory cards, inputs
 
-Type scale: Display 64px, Headline 48px, Section heading 28px, Subhead 20px, Body 16px, Small 14px, Caption 12px.
-
-## Elevation
-Cards rest flat with a 1px warm border (#D6D3D1) and gain a soft shadow on hover (0 4px 16px rgba(28,25,23,0.06)). Modals use a larger shadow (0 24px 48px rgba(28,25,23,0.12)) with backdrop blur. Primary buttons gain a warm glow on hover (0 4px 12px rgba(194,65,12,0.25)).
+## Elevation & Surfaces
+- **Cards**: white bg, `border-radius: 24px`, `border: 1px solid #EFE7DE`, `box-shadow: 0 6px 22px rgba(75,67,88,0.08)`
+- **Modals**: white bg, `border-radius: 28px`, `box-shadow: 0 20px 60px rgba(75,67,88,0.22)`
+- **Kid hero**: `border-radius: 28px`, gradient from kid's `soft` → `mid` at 40% opacity
+- **Stat chips**: `rgba(255,255,255,0.72)` bg, `border-radius: 16px`, `backdrop-filter: blur(2px)`
 
 ## Components
-- **Buttons**: Primary uses terracotta (#C2410C) fill, white text, 8px radius, semibold. Secondary: transparent bg + 1px stone border.
-- **Cards**: Warm white surface (#F5F5F4), 1px border (#D6D3D1), 12px radius, 16px padding.
-- **Inputs**: 1px border (#D6D3D1), surface background, 8px radius. Focus: terracotta border + warm ring.
-- **Tabs**: Active tab: terracotta text, shadow. Inactive: stone text.
+
+### Navigation (Nav)
+Two rows:
+1. Logo row: cream bg, 💛 emoji in peach-soft rotated square + "הזכרונות שלנו" in Secular One
+2. Kid pills row: pill-shaped tabs with emoji avatar (👦/👧). Active: kid's soft/mid/deep. Inactive: transparent.
+
+### Kid Profile (KidProfile)
+Gradient hero card: `linear-gradient(135deg, kid.soft, kid.mid at 40% opacity)`. Avatar: rounded square (32% radius), rotated -3deg, white ring + colored outer ring. Stats: white glass chips with backdrop-filter blur.
+
+### Memory Card (MemoryCard)
+- First photo: full-width hero at 220px height
+- Extra photos: `+N` badge bottom-left (dark glass pill)
+- Options `···` button: absolute top-left, white pill with soft shadow
+- Tags: colored pills using each tag's color family
+- Footer: tags left, date+age right, separated by a `#EFE7DE` top border
+
+### Memory Modal (MemoryModal)
+- 28px radius, heavy shadow
+- Labels: Varela Round 13.5px inkSoft
+- Tags: color-coded toggles (active = tag's soft/mid/deep, inactive = #FAFAF8)
+- Dropzone: 18px radius, peach icon, #FAFAF8 bg
+- Submit button: pill, peach-deep bg, white text
+
+### Password Gate (PasswordGate)
+Cream page bg, logo icon (peach-soft rotated square, 💛), white card with 24px radius and soft shadow. Submit: peach pill. Guest: outline pill.
 
 ## Spacing
-Base unit: 4px — scale: 4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80px.
+Base 4px grid — components use 8/12/14/16/18/20/24/28px padding.
 
-## Do's and Don'ts
-- Do use terracotta (#C2410C) only for interactive elements and active states
-- Do maintain the 4px spacing grid consistently
-- Do keep the warm tone — avoid cool grays or blue-tinted neutrals
-- Don't use pure black or pure white — always use the warm palette values
-- Don't add decorative elements — warmth comes from color, not ornament
+## Dark Mode
+Background: dark plum `hsl(265 14% 12%)`, Card: `hsl(265 14% 16%)`. All pastel values remain the same (they pop well on dark plum).

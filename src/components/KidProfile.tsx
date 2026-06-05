@@ -6,9 +6,9 @@ import { Camera, Loader2, Pencil, Expand } from "lucide-react";
 import { KidEditModal } from "@/components/KidEditModal";
 import { useLanguage } from "@/context/LanguageContext";
 import { getAge, getZodiacSign } from "@/lib/zodiac";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import { getKidColors } from "@/lib/kidColors";
 import type { Kid } from "@/types";
 
 interface KidProfileProps {
@@ -50,22 +50,55 @@ function colorEmoji(he: string, en: string): string {
   return "🎨";
 }
 
-interface StatItemProps {
+interface StatChipProps {
   label: string;
   value: string;
   emoji?: string;
+  softColor: string;
 }
 
-function StatItem({ label, value, emoji }: StatItemProps) {
+function StatChip({ label, value, emoji, softColor }: StatChipProps) {
   return (
-    <div className="flex flex-col gap-1 p-3 rounded-lg bg-background border border-border">
-      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-        {label}
-      </span>
-      <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-        {emoji && <span>{emoji}</span>}
-        <span>{value}</span>
-      </span>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "9px 14px",
+        background: "rgba(255,255,255,0.72)",
+        borderRadius: 16,
+        backdropFilter: "blur(2px)",
+        WebkitBackdropFilter: "blur(2px)",
+      }}
+    >
+      <div
+        style={{
+          width: 32,
+          height: 32,
+          borderRadius: 10,
+          background: softColor,
+          display: "grid",
+          placeItems: "center",
+          fontSize: 16,
+          flexShrink: 0,
+        }}
+      >
+        {emoji ?? "•"}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+        <span
+          className="font-round"
+          style={{ fontSize: 11.5, color: "#8E869C" }}
+        >
+          {label}
+        </span>
+        <span
+          className="font-round"
+          style={{ fontSize: 15, color: "#4B4358", fontWeight: 700 }}
+        >
+          {value}
+        </span>
+      </div>
     </div>
   );
 }
@@ -81,6 +114,7 @@ export function KidProfile({ kid }: KidProfileProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const age = getAge(kidData.birthdate);
   const zodiac = getZodiacSign(kidData.birthdate);
+  const c = getKidColors(kidData.order);
 
   const birthFormatted = new Date(kidData.birthdate).toLocaleDateString(
     language === "he" ? "he-IL" : "en-US",
@@ -119,113 +153,256 @@ export function KidProfile({ kid }: KidProfileProps) {
   }
 
   return (
-    <div className="flex flex-col sm:flex-row gap-6 p-6 bg-card rounded-lg border border-border shadow-card">
-      {/* Avatar with hover actions below */}
-      <div className="flex-shrink-0 flex flex-col items-center gap-2">
-        <div className="group relative">
-          {/* Avatar circle */}
-          {photoUrl ? (
-            <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-primary/20">
+    <div
+      style={{
+        borderRadius: 28,
+        padding: "26px 28px",
+        background: `linear-gradient(135deg, ${c.soft} 0%, ${c.mid}40 100%)`,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Decorative blobs */}
+      <div
+        style={{
+          position: "absolute",
+          top: -40,
+          right: -30,
+          width: 140,
+          height: 140,
+          borderRadius: "50%",
+          background: c.mid,
+          filter: "blur(2px)",
+          opacity: 0.35,
+          pointerEvents: "none",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: -50,
+          left: 60,
+          width: 120,
+          height: 120,
+          borderRadius: "50%",
+          background: c.soft,
+          filter: "blur(2px)",
+          opacity: 0.5,
+          pointerEvents: "none",
+        }}
+      />
+
+      <div
+        className="flex flex-col sm:flex-row gap-6"
+        style={{ position: "relative" }}
+        dir={dir}
+      >
+        {/* Avatar */}
+        <div className="flex-shrink-0 flex flex-col items-center gap-2">
+          <div className="group relative">
+            {photoUrl ? (
+              <div
+                style={{
+                  width: 104,
+                  height: 104,
+                  borderRadius: "32%",
+                  overflow: "hidden",
+                  transform: "rotate(-3deg)",
+                  boxShadow: `0 0 0 5px #fff, 0 0 0 9px ${c.mid}`,
+                  flexShrink: 0,
+                }}
+              >
+                <Image
+                  src={photoUrl}
+                  alt={t(kid.name_he, kid.name_en)}
+                  width={104}
+                  height={104}
+                  className="object-cover w-full h-full"
+                />
+              </div>
+            ) : (
+              <div
+                style={{
+                  width: 104,
+                  height: 104,
+                  borderRadius: "32%",
+                  background: `linear-gradient(150deg, ${c.soft}, ${c.mid})`,
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: 52,
+                  transform: "rotate(-3deg)",
+                  boxShadow: `0 0 0 5px #fff, 0 0 0 9px ${c.mid}`,
+                  flexShrink: 0,
+                }}
+              >
+                {kid.gender === "m" ? "👦" : "👧"}
+              </div>
+            )}
+
+            {/* Hover actions */}
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {!isGuest && (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  title={t("החלפת תמונה", "Change photo")}
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: "#fff",
+                    border: "1px solid #EFE7DE",
+                    boxShadow: "0 2px 6px rgba(75,67,88,0.10)",
+                    display: "grid",
+                    placeItems: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  {uploading ? (
+                    <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+                  ) : (
+                    <Camera className="w-3 h-3 text-muted-foreground" />
+                  )}
+                </button>
+              )}
+              {photoUrl && (
+                <button
+                  onClick={() => setLightboxOpen(true)}
+                  title={t("הגדלה", "View full")}
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: "#fff",
+                    border: "1px solid #EFE7DE",
+                    boxShadow: "0 2px 6px rgba(75,67,88,0.10)",
+                    display: "grid",
+                    placeItems: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Expand className="w-3 h-3 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="h-5" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
+        </div>
+
+        {/* Lightbox */}
+        {lightboxOpen && photoUrl && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <div className="relative max-w-[90vw] max-h-[90vh] w-full h-full">
               <Image
                 src={photoUrl}
-                alt={t(kid.name_he, kid.name_en)}
-                width={96}
-                height={96}
-                className="object-cover w-full h-full"
+                alt={t(kidData.name_he, kidData.name_en)}
+                fill
+                className="object-contain"
+                sizes="90vw"
               />
             </div>
-          ) : (
-            <Avatar className="w-24 h-24 ring-4 ring-primary/20">
-              <AvatarFallback className="text-2xl bg-primary/10 text-primary font-display">
-                {t(kid.name_he, kid.name_en).charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-          )}
+          </div>
+        )}
 
-          {/* Two small icon buttons that appear below the avatar on hover */}
-          <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Info */}
+        <div className="flex-1">
+          <div className="flex items-start justify-between">
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 10,
+                  marginBottom: 4,
+                }}
+              >
+                <h2
+                  className="font-display"
+                  style={{ margin: 0, fontSize: 34, color: "#4B4358" }}
+                >
+                  {t(kidData.name_he, kidData.name_en)}
+                </h2>
+                <span
+                  className="font-round"
+                  style={{ fontSize: 16, color: c.deep }}
+                >
+                  {t(
+                    kidData.gender === "m" ? `בן ${age}` : `בת ${age}`,
+                    `Age ${age}`
+                  )}
+                </span>
+              </div>
+            </div>
             {!isGuest && (
               <button
-                onClick={() => fileInputRef.current?.click()}
-                title={t("החלפת תמונה", "Change photo")}
-                className="p-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-secondary transition-colors"
+                onClick={() => setEditOpen(true)}
+                title={t("עריכת פרטים", "Edit details")}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 12,
+                  border: "none",
+                  background: "#fff",
+                  color: "#8E869C",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 8px rgba(75,67,88,0.12)",
+                  display: "grid",
+                  placeItems: "center",
+                  flexShrink: 0,
+                }}
               >
-                {uploading
-                  ? <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
-                  : <Camera className="w-3.5 h-3.5 text-muted-foreground" />
-                }
-              </button>
-            )}
-            {photoUrl && (
-              <button
-                onClick={() => setLightboxOpen(true)}
-                title={t("הגדלה", "View full")}
-                className="p-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-secondary transition-colors"
-              >
-                <Expand className="w-3.5 h-3.5 text-muted-foreground" />
+                <Pencil className="h-4 w-4" />
               </button>
             )}
           </div>
-        </div>
 
-        {/* Spacer so icons don't overlap the content below */}
-        <div className="h-4" />
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handlePhotoChange}
-        />
-      </div>
-
-      {/* Lightbox */}
-      {lightboxOpen && photoUrl && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
-          onClick={() => setLightboxOpen(false)}
-        >
-          <div className="relative max-w-[90vw] max-h-[90vh] w-full h-full">
-            <Image
-              src={photoUrl}
-              alt={t(kidData.name_he, kidData.name_en)}
-              fill
-              className="object-contain"
-              sizes="90vw"
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              marginTop: 16,
+            }}
+          >
+            <StatChip
+              label={t("יום הולדת", "Birthday")}
+              value={birthFormatted}
+              emoji="🎂"
+              softColor={c.soft}
+            />
+            <StatChip
+              label={t("גיל", "Age")}
+              value={t(`${age} שנים`, `${age} years old`)}
+              emoji="🌟"
+              softColor={c.soft}
+            />
+            <StatChip
+              label={t("מזל", "Star sign")}
+              value={`${zodiac.emoji} ${t(zodiac.he, zodiac.en)}`}
+              softColor={c.soft}
+            />
+            <StatChip
+              label={t("אוכל אהוב", "Favorite food")}
+              value={t(kidData.favorite_food_he, kidData.favorite_food_en)}
+              emoji={foodEmoji(kidData.favorite_food_he, kidData.favorite_food_en)}
+              softColor={c.soft}
+            />
+            <StatChip
+              label={t("צבע אהוב", "Favorite color")}
+              value={t(kidData.favorite_color_he, kidData.favorite_color_en)}
+              emoji={colorEmoji(kidData.favorite_color_he, kidData.favorite_color_en)}
+              softColor={c.soft}
             />
           </div>
-        </div>
-      )}
-
-      {/* Info */}
-      <div className="flex-1" dir={dir}>
-        <div className="flex items-start justify-between">
-          <div>
-            <h2 className="text-2xl font-display font-bold text-foreground mb-1">
-              {t(kidData.name_he, kidData.name_en)}
-            </h2>
-            <p className="text-muted-foreground text-sm mb-4">
-              {t(kidData.gender === "m" ? `בן ${age}` : `בת ${age}`, `Age ${age}`)}
-            </p>
-          </div>
-          {!isGuest && (
-            <button
-              onClick={() => setEditOpen(true)}
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-              title={t("עריכת פרטים", "Edit details")}
-            >
-              <Pencil className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <StatItem label={t("יום הולדת", "Birthday")} value={birthFormatted} emoji="🎂" />
-          <StatItem label={t("גיל", "Age")} value={t(`${age} שנים`, `${age} years old`)} emoji="🌟" />
-          <StatItem label={t("מזל", "Star sign")} value={`${zodiac.emoji} ${t(zodiac.he, zodiac.en)}`} />
-          <StatItem label={t("אוכל אהוב", "Favorite food")} value={t(kidData.favorite_food_he, kidData.favorite_food_en)} emoji={foodEmoji(kidData.favorite_food_he, kidData.favorite_food_en)} />
-          <StatItem label={t("צבע אהוב", "Favorite color")} value={t(kidData.favorite_color_he, kidData.favorite_color_en)} emoji={colorEmoji(kidData.favorite_color_he, kidData.favorite_color_en)} />
         </div>
       </div>
 

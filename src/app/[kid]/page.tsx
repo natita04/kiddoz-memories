@@ -93,6 +93,7 @@ export default function KidPage() {
           kidBirthdate={kid.birthdate}
           allKids={allKids}
           initialMemories={memories}
+          kidOrder={kid.order}
         />
       </main>
     </div>

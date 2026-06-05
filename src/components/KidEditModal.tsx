@@ -68,7 +68,10 @@ export function KidEditModal({ open, onClose, kid, onSaved }: KidEditModalProps)
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent
+        className="max-w-md"
+        style={{ borderRadius: 28, boxShadow: "0 20px 60px rgba(75,67,88,0.22)" }}
+      >
         <DialogHeader>
           <DialogTitle>{t("עריכת פרטים", "Edit details")}</DialogTitle>
         </DialogHeader>

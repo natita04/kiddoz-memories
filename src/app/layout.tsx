@@ -1,13 +1,21 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Rubik } from "next/font/google";
+import { Secular_One, Varela_Round, Rubik } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
+const secularOne = Secular_One({
+  weight: "400",
+  subsets: ["latin", "hebrew"],
   variable: "--font-display",
+  display: "swap",
+});
+
+const varelaRound = Varela_Round({
+  weight: "400",
+  subsets: ["latin", "hebrew"],
+  variable: "--font-round",
   display: "swap",
 });
 
@@ -29,7 +37,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="he" dir="rtl" suppressHydrationWarning>
-      <body className={`${playfair.variable} ${rubik.variable} antialiased`}>
+      <body className={`${secularOne.variable} ${varelaRound.variable} ${rubik.variable} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

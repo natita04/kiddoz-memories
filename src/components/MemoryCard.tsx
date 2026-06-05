@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { MoreHorizontal, Pencil, Trash2, Calendar, X, ChevronLeft, ChevronRight, Clock } from "lucide-react";
-import { getTagLabel } from "@/lib/tags";
+import { Pencil, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { PREDEFINED_TAGS, getTagLabel } from "@/lib/tags";
 import { getAgeAtDate } from "@/lib/zodiac";
 import {
   DropdownMenu,
@@ -12,7 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import type { Kid, Memory } from "@/types";
@@ -57,7 +56,6 @@ function Lightbox({
       tabIndex={0}
       autoFocus
     >
-      {/* Close */}
       <button
         className="absolute top-4 right-4 text-white/80 hover:text-white p-2"
         onClick={onClose}
@@ -65,17 +63,18 @@ function Lightbox({
         <X className="w-6 h-6" />
       </button>
 
-      {/* Prev */}
       {photos.length > 1 && (
         <button
           className="absolute left-4 text-white/80 hover:text-white p-2"
-          onClick={(e) => { e.stopPropagation(); prev(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            prev();
+          }}
         >
           <ChevronLeft className="w-8 h-8" />
         </button>
       )}
 
-      {/* Image */}
       <div
         className="relative max-w-[90vw] max-h-[90vh] w-full h-full"
         onClick={(e) => e.stopPropagation()}
@@ -89,17 +88,18 @@ function Lightbox({
         />
       </div>
 
-      {/* Next */}
       {photos.length > 1 && (
         <button
           className="absolute right-4 text-white/80 hover:text-white p-2"
-          onClick={(e) => { e.stopPropagation(); next(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            next();
+          }}
         >
           <ChevronRight className="w-8 h-8" />
         </button>
       )}
 
-      {/* Counter */}
       {photos.length > 1 && (
         <div className="absolute bottom-4 text-white/60 text-sm">
           {index + 1} / {photos.length}
@@ -109,11 +109,19 @@ function Lightbox({
   );
 }
 
-export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: MemoryCardProps) {
+export function MemoryCard({
+  memory,
+  kidBirthdate,
+  allKids,
+  onEdit,
+  onDelete,
+}: MemoryCardProps) {
   const { language, t, dir } = useLanguage();
   const { isGuest } = useAuth();
   const ageAtMemory = getAgeAtDate(kidBirthdate, memory.memory_date);
-  const sharedWith = allKids.filter((k) => memory.shared_kid_ids?.includes(k.id));
+  const sharedWith = allKids.filter((k) =>
+    memory.shared_kid_ids?.includes(k.id)
+  );
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
@@ -137,50 +145,102 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
   }
 
   const photos = memory.photos ?? [];
+  const hasPhotos = photos.length > 0;
+  const extraPhotos = photos.length - 1;
 
   return (
     <>
-      <article className="bg-card border border-border rounded-lg shadow-card hover:shadow-card-hover transition-shadow duration-200 overflow-hidden animate-fade-in">
-
-        {/* Photo thumbnails */}
-        {photos.length > 0 && (
-          <div className="flex gap-1.5 p-3 pb-0 flex-wrap">
-            {photos.map((url, i) => (
-              <button
-                key={url}
-                onClick={() => setLightboxIndex(i)}
-                className="relative w-20 h-20 rounded-md overflow-hidden bg-secondary flex-shrink-0 hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring"
+      <article
+        className="animate-fade-in"
+        style={{
+          background: "#fff",
+          borderRadius: 24,
+          overflow: "hidden",
+          boxShadow: "0 6px 22px rgba(75,67,88,0.08)",
+          border: "1px solid #EFE7DE",
+          position: "relative",
+        }}
+      >
+        {/* Hero photo */}
+        {hasPhotos && (
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={() => setLightboxIndex(0)}
+              style={{
+                display: "block",
+                width: "100%",
+                height: 220,
+                position: "relative",
+                cursor: "pointer",
+                border: "none",
+                padding: 0,
+                background: "transparent",
+              }}
+            >
+              <Image
+                src={photos[0]}
+                alt="Memory photo"
+                fill
+                className="object-cover"
+                sizes="(max-width: 896px) 100vw, 896px"
+              />
+            </button>
+            {extraPhotos > 0 && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: 14,
+                  left: 14,
+                  background: "rgba(55,45,70,0.68)",
+                  backdropFilter: "blur(4px)",
+                  WebkitBackdropFilter: "blur(4px)",
+                  color: "#fff",
+                  fontFamily: "var(--font-round, sans-serif)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  padding: "5px 13px",
+                  borderRadius: 99,
+                  letterSpacing: "0.3px",
+                  pointerEvents: "none",
+                }}
               >
-                <Image
-                  src={url}
-                  alt={`Memory photo ${i + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="80px"
-                />
-              </button>
-            ))}
+                +{extraPhotos}
+              </div>
+            )}
           </div>
         )}
 
-        {/* Content */}
-        <div className="p-4" dir={dir}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              {story && (
-                <p className="text-foreground text-base leading-relaxed whitespace-pre-wrap">
-                  {story}
-                </p>
-              )}
-            </div>
-
-            {/* Actions dropdown — hidden for guests */}
-            {!isGuest && <DropdownMenu>
+        {/* Options button */}
+        {!isGuest && (
+          <div
+            style={{
+              position: "absolute",
+              top: 14,
+              left: 16,
+              zIndex: 2,
+            }}
+          >
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0 -mt-1">
-                  <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Options</span>
-                </Button>
+                <button
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    border: "1px solid #EFE7DE",
+                    background: "#fff",
+                    color: "#8E869C",
+                    cursor: "pointer",
+                    display: "grid",
+                    placeItems: "center",
+                    fontSize: 16,
+                    letterSpacing: 2,
+                    lineHeight: 1,
+                    boxShadow: "0 2px 6px rgba(75,67,88,0.08)",
+                  }}
+                >
+                  ···
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => onEdit(memory)}>
@@ -190,53 +250,146 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleDelete}
-                  className={confirmingDelete ? "text-destructive focus:text-destructive" : ""}
+                  className={
+                    confirmingDelete
+                      ? "text-destructive focus:text-destructive"
+                      : ""
+                  }
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  {confirmingDelete ? t("לחץ שוב לאישור", "Click again to confirm") : t("מחיקה", "Delete")}
+                  {confirmingDelete
+                    ? t("לחץ שוב לאישור", "Click again to confirm")
+                    : t("מחיקה", "Delete")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>}
+            </DropdownMenu>
           </div>
+        )}
 
+        {/* Text content */}
+        <div
+          dir={dir}
+          style={{
+            padding: hasPhotos
+              ? "18px 44px 18px 24px"
+              : "28px 44px 18px 24px",
+          }}
+        >
+          {story && (
+            <p
+              style={{
+                margin: 0,
+                fontFamily: "var(--font-sans, Rubik, sans-serif)",
+                fontSize: 16,
+                lineHeight: 1.7,
+                color: "#4B4358",
+                textAlign: dir === "rtl" ? "right" : "left",
+              }}
+            >
+              {story}
+            </p>
+          )}
+
+          {/* Footer: tags + date/age */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginTop: 14,
+              paddingTop: 14,
+              borderTop: "1px solid #EFE7DE",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
             {/* Tags */}
-          {memory.tags?.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-3">
-              {memory.tags.map((tag) => (
+            <div
+              style={{
+                display: "flex",
+                gap: 6,
+                flexWrap: "wrap",
+                flex: 1,
+              }}
+            >
+              {memory.tags?.map((tagId) => {
+                const tagDef = PREDEFINED_TAGS.find((t) => t.id === tagId);
+                const label = getTagLabel(tagId, language);
+                return (
+                  <span
+                    key={tagId}
+                    style={
+                      tagDef
+                        ? {
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 5,
+                            padding: "5px 11px",
+                            borderRadius: 99,
+                            fontFamily: "var(--font-round, sans-serif)",
+                            fontSize: 12.5,
+                            background: tagDef.colors.soft,
+                            color: tagDef.colors.deep,
+                            border: `1.5px solid ${tagDef.colors.mid}`,
+                          }
+                        : {
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 5,
+                            padding: "5px 11px",
+                            borderRadius: 99,
+                            fontFamily: "var(--font-round, sans-serif)",
+                            fontSize: 12.5,
+                            background: "#F5F5F5",
+                            color: "#8E869C",
+                            border: "1.5px solid #EFE7DE",
+                          }
+                    }
+                  >
+                    {label}
+                  </span>
+                );
+              })}
+
+              {/* Shared-with badge */}
+              {sharedWith.length > 0 && (
                 <span
-                  key={tag}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-secondary text-secondary-foreground border border-border"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    padding: "5px 11px",
+                    borderRadius: 99,
+                    fontFamily: "var(--font-round, sans-serif)",
+                    fontSize: 12.5,
+                    background: "#EDE7FB",
+                    color: "#7E5BC9",
+                    border: "1.5px solid #CBB8F2",
+                  }}
                 >
-                  {getTagLabel(tag, language)}
+                  🤝{" "}
+                  {t("גם עם", "Also with")}{" "}
+                  {sharedWith.map((k) => t(k.name_he, k.name_en)).join(", ")}
                 </span>
-              ))}
+              )}
             </div>
-          )}
 
-          {/* Shared with */}
-          {sharedWith.length > 0 && (
-            <div className="flex items-center gap-1.5 mt-3">
-              <span className="text-xs text-muted-foreground">
-                🤝 {t("גם עם", "Also with")}{" "}
-                {sharedWith.map((k) => t(k.name_he, k.name_en)).join(", ")}
-              </span>
+            {/* Date + age */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                fontFamily: "var(--font-round, sans-serif)",
+                fontSize: 12.5,
+                color: "#8E869C",
+                whiteSpace: "nowrap",
+                flexShrink: 0,
+              }}
+            >
+              <span>📅 {dateFormatted}</span>
+              {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
             </div>
-          )}
-
-          {/* Date + age */}
-          <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-              <time className="text-xs text-muted-foreground">{dateFormatted}</time>
-            </div>
-            {ageAtMemory && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3 text-muted-foreground/60" />
-                <span className="text-xs text-muted-foreground/60">
-                  {t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}
-                </span>
-              </div>
-            )}
           </div>
         </div>
       </article>
