@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { Camera, Loader2, Pencil } from "lucide-react";
+import { Camera, Loader2, Pencil, Expand } from "lucide-react";
 import { KidEditModal } from "@/components/KidEditModal";
 import { useLanguage } from "@/context/LanguageContext";
 import { getAge, getZodiacSign } from "@/lib/zodiac";
@@ -76,6 +76,7 @@ export function KidProfile({ kid }: KidProfileProps) {
   const [photoUrl, setPhotoUrl] = useState(kid.profile_photo_url);
   const [uploading, setUploading] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const age = getAge(kidData.birthdate);
   const zodiac = getZodiacSign(kidData.birthdate);
 
@@ -117,13 +118,10 @@ export function KidProfile({ kid }: KidProfileProps) {
 
   return (
     <div className="flex flex-col sm:flex-row gap-6 p-6 bg-card rounded-lg border border-border shadow-card">
-      {/* Avatar with upload overlay */}
-      <div className="flex-shrink-0 flex justify-center sm:justify-start">
-        <button
-          className="relative group cursor-pointer"
-          onClick={() => fileInputRef.current?.click()}
-          title={t("לחץ להחלפת תמונה", "Click to change photo")}
-        >
+      {/* Avatar with hover actions below */}
+      <div className="flex-shrink-0 flex flex-col items-center gap-2">
+        <div className="group relative">
+          {/* Avatar circle */}
           {photoUrl ? (
             <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-primary/20">
               <Image
@@ -142,14 +140,32 @@ export function KidProfile({ kid }: KidProfileProps) {
             </Avatar>
           )}
 
-          {/* Hover overlay */}
-          <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-            {uploading
-              ? <Loader2 className="w-5 h-5 text-white animate-spin" />
-              : <Camera className="w-5 h-5 text-white" />
-            }
+          {/* Two small icon buttons that appear below the avatar on hover */}
+          <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              title={t("החלפת תמונה", "Change photo")}
+              className="p-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-secondary transition-colors"
+            >
+              {uploading
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+                : <Camera className="w-3.5 h-3.5 text-muted-foreground" />
+              }
+            </button>
+            {photoUrl && (
+              <button
+                onClick={() => setLightboxOpen(true)}
+                title={t("הגדלה", "View full")}
+                className="p-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-secondary transition-colors"
+              >
+                <Expand className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            )}
           </div>
-        </button>
+        </div>
+
+        {/* Spacer so icons don't overlap the content below */}
+        <div className="h-4" />
 
         <input
           ref={fileInputRef}
@@ -159,6 +175,24 @@ export function KidProfile({ kid }: KidProfileProps) {
           onChange={handlePhotoChange}
         />
       </div>
+
+      {/* Lightbox */}
+      {lightboxOpen && photoUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <div className="relative max-w-[90vw] max-h-[90vh] w-full h-full">
+            <Image
+              src={photoUrl}
+              alt={t(kidData.name_he, kidData.name_en)}
+              fill
+              className="object-contain"
+              sizes="90vw"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Info */}
       <div className="flex-1" dir={dir}>
