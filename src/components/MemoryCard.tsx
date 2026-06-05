@@ -163,7 +163,9 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
           dir={dir}
           style={{
             flex: 1,
-            padding: hasPhotos ? "20px 18px 18px 44px" : "24px 18px 18px 44px",
+            padding: dir === "rtl"
+              ? (hasPhotos ? "20px 18px 18px 44px" : "24px 18px 18px 44px")
+              : (hasPhotos ? "20px 44px 18px 18px" : "24px 44px 18px 18px"),
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
@@ -217,9 +219,9 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
           </div>
         </div>
 
-        {/* ── ··· options button — absolute top-left (physical left) ── */}
+        {/* ── ··· options button — inline-end corner (right in LTR, left in RTL) ── */}
         {!isGuest && (
-          <div style={{ position: "absolute", top: 14, left: 16, zIndex: 3 }}>
+          <div style={{ position: "absolute", top: 14, ...(dir === "rtl" ? { left: 16 } : { right: 16 }), zIndex: 3 }}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button style={{ width: 32, height: 32, borderRadius: 10,
