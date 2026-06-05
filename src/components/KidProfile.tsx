@@ -71,7 +71,7 @@ export function KidProfile({ kid }: KidProfileProps) {
           {t(kid.name_he, kid.name_en)}
         </h2>
         <p className="text-muted-foreground text-sm mb-4">
-          {t(`בן/בת ${age}`, `Age ${age}`)}
+          {t(kid.gender === "m" ? `בן ${age}` : `בת ${age}`, `Age ${age}`)}
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">

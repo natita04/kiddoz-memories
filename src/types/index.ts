@@ -12,6 +12,7 @@ export interface Kid {
   favorite_color_en: string;
   profile_photo_url: string | null;
   order: number;
+  gender: "m" | "f";
 }
 
 export interface Memory {
