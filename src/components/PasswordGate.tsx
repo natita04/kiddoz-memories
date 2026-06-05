@@ -20,6 +20,8 @@ export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps)
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, dir } = useLanguage();
 
+  const isHe = language === "he";
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (authenticate(password)) {
@@ -34,13 +36,13 @@ export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps)
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4" dir={dir}>
-      {/* Top-right controls — mirrors the Nav */}
-      <div className="fixed top-4 end-4 flex items-center gap-2">
+      {/* Controls — fixed to top-right physically, never moves with RTL */}
+      <div className="fixed top-4 right-4 flex items-center gap-2">
         <button
-          onClick={() => setLanguage(language === "he" ? "en" : "he")}
+          onClick={() => setLanguage(isHe ? "en" : "he")}
           className="px-3 py-1 rounded-md text-xs font-semibold border border-border hover:bg-secondary transition-colors bg-background"
         >
-          {language === "he" ? "EN" : "עב"}
+          {isHe ? "EN" : "עב"}
         </button>
         <Button
           variant="ghost"
@@ -58,10 +60,10 @@ export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps)
             <Heart className="w-8 h-8 text-primary" fill="currentColor" />
           </div>
           <h1 className="text-3xl font-display font-bold text-foreground mb-2">
-            {language === "he" ? "הזכרונות שלנו" : "Our Memories"}
+            {isHe ? "הזכרונות שלנו" : "Our Memories"}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {language === "he" ? "Our family memories" : "הזיכרונות של המשפחה"}
+            {isHe ? "הזיכרונות של המשפחה" : "A private family scrapbook"}
           </p>
         </div>
 
@@ -69,7 +71,7 @@ export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps)
           <form id="password-form" onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-foreground block">
-                {language === "he" ? "סיסמה / Password" : "Password / סיסמה"}
+                {isHe ? "סיסמה" : "Password"}
               </label>
               <Input
                 type="password"
@@ -78,7 +80,7 @@ export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps)
                   setPassword(e.target.value);
                   setError(false);
                 }}
-                placeholder={language === "he" ? "הכנס סיסמה" : "Enter password"}
+                placeholder={isHe ? "הכנס סיסמה" : "Enter password"}
                 className={error ? "border-destructive focus-visible:ring-destructive" : ""}
                 autoFocus
                 autoComplete="current-password"
@@ -86,12 +88,12 @@ export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps)
               />
               {error && (
                 <p className="text-xs text-destructive">
-                  {language === "he" ? "סיסמה שגויה · Wrong password" : "Wrong password · סיסמה שגויה"}
+                  {isHe ? "סיסמה שגויה" : "Wrong password"}
                 </p>
               )}
             </div>
             <Button type="submit" className="w-full" size="lg">
-              {language === "he" ? "כניסה · Enter" : "Enter · כניסה"}
+              {isHe ? "כניסה" : "Enter"}
             </Button>
           </form>
 
