@@ -32,7 +32,7 @@ export function Nav() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="container max-w-4xl mx-auto flex h-14 items-center justify-between px-4">
+      <div className="container max-w-4xl mx-auto flex h-14 items-center justify-between px-4" dir="ltr">
         {/* Kid tabs */}
         <nav className="flex items-center gap-1">
           {kids.map((kid) => {
