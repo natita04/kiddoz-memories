@@ -13,6 +13,41 @@ interface KidProfileProps {
   kid: Kid;
 }
 
+function foodEmoji(he: string, en: string): string {
+  const s = `${he} ${en}`.toLowerCase();
+  if (s.includes("pizza") || s.includes("פיצה")) return "🍕";
+  if (s.includes("toast") || s.includes("טוסט")) return "🍞";
+  if (s.includes("egg") || s.includes("ביצ")) return "🍳";
+  if (s.includes("chocolate") || s.includes("שוקולד")) return "🍫";
+  if (s.includes("pasta") || s.includes("פסטה")) return "🍝";
+  if (s.includes("rice") || s.includes("אורז")) return "🍚";
+  if (s.includes("burger") || s.includes("המבורגר")) return "🍔";
+  if (s.includes("sushi") || s.includes("סושי")) return "🍣";
+  if (s.includes("salad") || s.includes("סלט")) return "🥗";
+  if (s.includes("soup") || s.includes("מרק")) return "🍲";
+  if (s.includes("ice cream") || s.includes("גלידה")) return "🍦";
+  if (s.includes("cake") || s.includes("עוגה")) return "🎂";
+  if (s.includes("apple") || s.includes("תפוח")) return "🍎";
+  if (s.includes("banana") || s.includes("בננה")) return "🍌";
+  return "🍽️";
+}
+
+function colorEmoji(he: string, en: string): string {
+  const s = `${he} ${en}`.toLowerCase();
+  if (s.includes("red") || s.includes("אדום")) return "🔴";
+  if (s.includes("blue") || s.includes("כחול")) return "🔵";
+  if (s.includes("green") || s.includes("ירוק")) return "🟢";
+  if (s.includes("yellow") || s.includes("צהוב")) return "🟡";
+  if (s.includes("orange") || s.includes("כתום")) return "🟠";
+  if (s.includes("purple") || s.includes("סגול")) return "🟣";
+  if (s.includes("brown") || s.includes("חום")) return "🟤";
+  if (s.includes("black") || s.includes("שחור")) return "⚫";
+  if (s.includes("white") || s.includes("לבן")) return "⚪";
+  if (s.includes("pink") || s.includes("ורוד")) return "🩷";
+  if (s.includes("gold") || s.includes("זהב")) return "🌟";
+  return "🎨";
+}
+
 interface StatItemProps {
   label: string;
   value: string;
@@ -135,8 +170,8 @@ export function KidProfile({ kid }: KidProfileProps) {
           <StatItem label={t("יום הולדת", "Birthday")} value={birthFormatted} emoji="🎂" />
           <StatItem label={t("גיל", "Age")} value={t(`${age} שנים`, `${age} years old`)} emoji="🌟" />
           <StatItem label={t("מזל", "Star sign")} value={`${zodiac.emoji} ${t(zodiac.he, zodiac.en)}`} />
-          <StatItem label={t("אוכל אהוב", "Favorite food")} value={t(kid.favorite_food_he, kid.favorite_food_en)} emoji="🍽️" />
-          <StatItem label={t("צבע אהוב", "Favorite color")} value={t(kid.favorite_color_he, kid.favorite_color_en)} emoji="🎨" />
+          <StatItem label={t("אוכל אהוב", "Favorite food")} value={t(kid.favorite_food_he, kid.favorite_food_en)} emoji={foodEmoji(kid.favorite_food_he, kid.favorite_food_en)} />
+          <StatItem label={t("צבע אהוב", "Favorite color")} value={t(kid.favorite_color_he, kid.favorite_color_en)} emoji={colorEmoji(kid.favorite_color_he, kid.favorite_color_en)} />
         </div>
       </div>
     </div>
