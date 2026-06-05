@@ -25,6 +25,11 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     if (stored === "he" || stored === "en") setLanguageState(stored);
   }, []);
 
+  useEffect(() => {
+    document.documentElement.dir = language === "he" ? "rtl" : "ltr";
+    document.documentElement.lang = language;
+  }, [language]);
+
   function setLanguage(lang: Language) {
     setLanguageState(lang);
     localStorage.setItem("kiddoz_lang", lang);
