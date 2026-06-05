@@ -365,14 +365,8 @@ export function KidProfile({ kid }: KidProfileProps) {
             )}
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 10,
-              marginTop: 16,
-            }}
-          >
+          {/* Row 1: birthday · age · zodiac */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 16 }}>
             <StatChip
               label={t("יום הולדת", "Birthday")}
               value={birthFormatted}
@@ -387,9 +381,13 @@ export function KidProfile({ kid }: KidProfileProps) {
             />
             <StatChip
               label={t("מזל", "Star sign")}
-              value={`${zodiac.emoji} ${t(zodiac.he, zodiac.en)}`}
+              value={t(zodiac.he, zodiac.en)}
+              emoji={zodiac.emoji}
               softColor={c.soft}
             />
+          </div>
+          {/* Row 2: food · color */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
             <StatChip
               label={t("אוכל אהוב", "Favorite food")}
               value={t(kidData.favorite_food_he, kidData.favorite_food_en)}

@@ -293,74 +293,46 @@ export function MemoryModal({
             />
           </div>
 
-          {/* Date + share row */}
-          <div style={{ display: "flex", gap: 16 }}>
-            <div style={{ flex: 1 }}>
-              <label style={labelStyle}>{t("תאריך", "Date")}</label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                max={today}
-                style={fieldStyle}
-              />
-            </div>
-
-            {otherKids.length > 0 && (
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>{t("שתף גם עם", "Also involves")}</label>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 8,
-                    padding: "10px 14px",
-                    background: "#FAFAF8",
-                    borderRadius: 14,
-                    border: "1.5px solid #EFE7DE",
-                  }}
-                >
-                  {otherKids.map((ok) => {
-                    const checked = sharedKidIds.includes(ok.id);
-                    return (
-                      <label
-                        key={ok.id}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                          cursor: "pointer",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={(e) =>
-                            setSharedKidIds((prev) =>
-                              e.target.checked
-                                ? [...prev, ok.id]
-                                : prev.filter((id) => id !== ok.id)
-                            )
-                          }
-                          style={{
-                            width: 18,
-                            height: 18,
-                            accentColor: "#E07F52",
-                          }}
-                        />
-                        <span
-                          className="font-round"
-                          style={{ fontSize: 14, color: "#4B4358" }}
-                        >
-                          {t(ok.name_he, ok.name_en)}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+          {/* Date */}
+          <div>
+            <label style={labelStyle}>{t("תאריך", "Date")}</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              max={today}
+              style={fieldStyle}
+            />
           </div>
+
+          {/* Share with — stacked below date */}
+          {otherKids.length > 0 && (
+            <div>
+              <label style={labelStyle}>{t("שתף גם עם", "Also involves")}</label>
+              <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                {otherKids.map((ok) => {
+                  const checked = sharedKidIds.includes(ok.id);
+                  return (
+                    <label key={ok.id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) =>
+                          setSharedKidIds((prev) =>
+                            e.target.checked ? [...prev, ok.id] : prev.filter((id) => id !== ok.id)
+                          )
+                        }
+                        style={{ width: 18, height: 18, accentColor: "#E07F52" }}
+                      />
+                      <span className="font-round" style={{ fontSize: 14, color: "#4B4358" }}>
+                        {t(ok.name_he, ok.name_en)}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Tags */}
           <div>
