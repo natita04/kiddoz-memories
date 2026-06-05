@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { MemoryCard } from "@/components/MemoryCard";
 import { MemoryModal } from "@/components/MemoryModal";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { PREDEFINED_TAGS, getTagLabel } from "@/lib/tags";
 import type { Kid, Memory } from "@/types";
@@ -20,6 +21,7 @@ interface MemoryFeedProps {
 
 export function MemoryFeed({ kidId, kidBirthdate, allKids, initialMemories }: MemoryFeedProps) {
   const { t, language } = useLanguage();
+  const { isGuest } = useAuth();
   const [memories, setMemories] = useState<Memory[]>(initialMemories);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
@@ -86,10 +88,12 @@ export function MemoryFeed({ kidId, kidBirthdate, allKids, initialMemories }: Me
             </span>
           )}
         </h3>
-        <Button onClick={openAddModal} size="sm">
-          <PlusCircle className="h-4 w-4 me-1.5" />
-          {t("זיכרון חדש", "Add memory")}
-        </Button>
+        {!isGuest && (
+          <Button onClick={openAddModal} size="sm">
+            <PlusCircle className="h-4 w-4 me-1.5" />
+            {t("זיכרון חדש", "Add memory")}
+          </Button>
+        )}
       </div>
 
       {/* Search + tag filters */}
@@ -145,9 +149,11 @@ export function MemoryFeed({ kidId, kidBirthdate, allKids, initialMemories }: Me
           <p className="text-muted-foreground text-sm">
             {t("עדיין אין זיכרונות. הוסיפו את הראשון!", "No memories yet. Add the first one!")}
           </p>
-          <Button onClick={openAddModal} variant="outline" size="sm" className="mt-4">
-            {t("הוסיפו זיכרון", "Add a memory")}
-          </Button>
+          {!isGuest && (
+            <Button onClick={openAddModal} variant="outline" size="sm" className="mt-4">
+              {t("הוסיפו זיכרון", "Add a memory")}
+            </Button>
+          )}
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground text-sm">

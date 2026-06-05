@@ -5,15 +5,16 @@ import { useTheme } from "next-themes";
 import { Heart, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { authenticate } from "@/lib/auth";
+import { authenticate, enterAsGuest } from "@/lib/auth";
 import { useLanguage } from "@/context/LanguageContext";
 
 interface PasswordGateProps {
   onSuccess: () => void;
+  onGuest: () => void;
   error?: string | null;
 }
 
-export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps) {
+export function PasswordGate({ onSuccess, onGuest, error: loadError }: PasswordGateProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const [shaking, setShaking] = useState(false);
@@ -100,6 +101,16 @@ export function PasswordGate({ onSuccess, error: loadError }: PasswordGateProps)
           {loadError && (
             <p className="mt-3 text-xs text-destructive text-center">{loadError}</p>
           )}
+
+          <div className="mt-4 pt-4 border-t border-border text-center">
+            <button
+              type="button"
+              onClick={() => { enterAsGuest(); onGuest(); }}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isHe ? "כניסה כאורח (צפייה בלבד)" : "Continue as guest (view only)"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

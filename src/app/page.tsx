@@ -42,16 +42,18 @@ export default function Home() {
     }
   }
 
-  function handleAuthSuccess() {
-    redirectToFirstKid();
-  }
-
   if (checking) {
     return <div className="min-h-screen bg-background" />;
   }
 
   if (showGate) {
-    return <PasswordGate onSuccess={handleAuthSuccess} error={loadError} />;
+    return (
+      <PasswordGate
+        onSuccess={redirectToFirstKid}
+        onGuest={redirectToFirstKid}
+        error={loadError}
+      />
+    );
   }
 
   return <div className="min-h-screen bg-background" />;

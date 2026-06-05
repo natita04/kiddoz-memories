@@ -8,6 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { getAge, getZodiacSign } from "@/lib/zodiac";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 import type { Kid } from "@/types";
 
 interface KidProfileProps {
@@ -71,6 +72,7 @@ function StatItem({ label, value, emoji }: StatItemProps) {
 
 export function KidProfile({ kid }: KidProfileProps) {
   const { t, language, dir } = useLanguage();
+  const { isGuest } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [kidData, setKidData] = useState(kid);
   const [photoUrl, setPhotoUrl] = useState(kid.profile_photo_url);
@@ -142,16 +144,18 @@ export function KidProfile({ kid }: KidProfileProps) {
 
           {/* Two small icon buttons that appear below the avatar on hover */}
           <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              title={t("החלפת תמונה", "Change photo")}
-              className="p-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-secondary transition-colors"
-            >
-              {uploading
-                ? <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
-                : <Camera className="w-3.5 h-3.5 text-muted-foreground" />
-              }
-            </button>
+            {!isGuest && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                title={t("החלפת תמונה", "Change photo")}
+                className="p-1.5 rounded-full bg-background border border-border shadow-sm hover:bg-secondary transition-colors"
+              >
+                {uploading
+                  ? <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
+                  : <Camera className="w-3.5 h-3.5 text-muted-foreground" />
+                }
+              </button>
+            )}
             {photoUrl && (
               <button
                 onClick={() => setLightboxOpen(true)}
@@ -205,13 +209,15 @@ export function KidProfile({ kid }: KidProfileProps) {
               {t(kidData.gender === "m" ? `בן ${age}` : `בת ${age}`, `Age ${age}`)}
             </p>
           </div>
-          <button
-            onClick={() => setEditOpen(true)}
-            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            title={t("עריכת פרטים", "Edit details")}
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+          {!isGuest && (
+            <button
+              onClick={() => setEditOpen(true)}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+              title={t("עריכת פרטים", "Edit details")}
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">

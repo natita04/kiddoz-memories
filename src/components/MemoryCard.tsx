@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
 import type { Kid, Memory } from "@/types";
 
 interface MemoryCardProps {
@@ -110,6 +111,7 @@ function Lightbox({
 
 export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: MemoryCardProps) {
   const { language, t, dir } = useLanguage();
+  const { isGuest } = useAuth();
   const ageAtMemory = getAgeAtDate(kidBirthdate, memory.memory_date);
   const sharedWith = allKids.filter((k) => memory.shared_kid_ids?.includes(k.id));
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -172,8 +174,8 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
               )}
             </div>
 
-            {/* Actions dropdown */}
-            <DropdownMenu>
+            {/* Actions dropdown — hidden for guests */}
+            {!isGuest && <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0 -mt-1">
                   <MoreHorizontal className="h-4 w-4" />
@@ -194,7 +196,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
                   {confirmingDelete ? t("לחץ שוב לאישור", "Click again to confirm") : t("מחיקה", "Delete")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu>}
           </div>
 
             {/* Tags */}
