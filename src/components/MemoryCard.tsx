@@ -250,12 +250,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
                   ···
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => onEdit(memory)}>
-                  <Pencil className="h-4 w-4 mr-2" />
-                  {t("עריכה", "Edit")}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
+              <DropdownMenuContent align="end" dir={dir}>
                 <DropdownMenuItem onClick={() => window.open(whatsappUrl, "_blank")}>
                   <span style={{ color: "#25D366", display: "flex", marginInlineEnd: 8 }}>
                     <WhatsAppIcon size={14} />
@@ -263,9 +258,14 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
                   {t("שליחה בוואטסאפ", "Share on WhatsApp")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => onEdit(memory)}>
+                  <Pencil className="h-4 w-4 me-2" />
+                  {t("עריכה", "Edit")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleDelete}
                   className={confirmingDelete ? "text-destructive focus:text-destructive" : ""}>
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-4 w-4 me-2" />
                   {confirmingDelete ? t("לחץ שוב לאישור", "Click again to confirm") : t("מחיקה", "Delete")}
                 </DropdownMenuItem>
               </DropdownMenuContent>

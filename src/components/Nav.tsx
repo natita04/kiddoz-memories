@@ -40,7 +40,7 @@ export function Nav() {
       {/* Row 1: Logo + controls — always LTR */}
       <div
         className="container max-w-4xl mx-auto flex h-14 items-center justify-between px-5"
-        dir="ltr"
+        dir="rtl"
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
@@ -119,7 +119,7 @@ export function Nav() {
       <div className="border-t border-line/60 dark:border-border/50">
         <nav
           className="container max-w-4xl mx-auto flex items-center gap-2 px-5 py-2"
-          dir={dir}
+          dir="rtl"
         >
           {kids.map((kid) => {
             const isActive = activeSlug === kid.slug;
