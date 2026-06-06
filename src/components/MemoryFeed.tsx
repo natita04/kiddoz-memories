@@ -26,7 +26,7 @@ export function MemoryFeed({
   initialMemories,
   kidOrder,
 }: MemoryFeedProps) {
-  const { t, language } = useLanguage();
+  const { t, language, dir } = useLanguage();
   const { isGuest } = useAuth();
   const kidColors = getKidColors(kidOrder);
   const [memories, setMemories] = useState<Memory[]>(initialMemories);
@@ -135,7 +135,8 @@ export function MemoryFeed({
             <span
               style={{
                 position: "absolute",
-                right: 14,
+                // 🔍 always on the inline-start side: right in RTL, left in LTR
+                ...(dir === "rtl" ? { right: 14 } : { left: 14 }),
                 top: "50%",
                 transform: "translateY(-50%)",
                 fontSize: 16,
@@ -151,7 +152,8 @@ export function MemoryFeed({
               placeholder={t("חיפוש בזיכרונות...", "Search memories...")}
               style={{
                 width: "100%",
-                padding: "12px 44px 12px 36px",
+                // icon side gets 44px, clear-button side gets 36px
+                padding: dir === "rtl" ? "12px 44px 12px 36px" : "12px 36px 12px 44px",
                 background: "#fff",
                 borderRadius: 16,
                 border: "1px solid #EFE7DE",
@@ -160,7 +162,7 @@ export function MemoryFeed({
                 color: "#4B4358",
                 outline: "none",
                 boxSizing: "border-box",
-                direction: "rtl",
+                direction: dir,
               }}
             />
             {searchQuery && (
@@ -168,7 +170,8 @@ export function MemoryFeed({
                 onClick={() => setSearchQuery("")}
                 style={{
                   position: "absolute",
-                  left: 12,
+                  // X clear always on the inline-end side: left in RTL, right in LTR
+                  ...(dir === "rtl" ? { left: 12 } : { right: 12 }),
                   top: "50%",
                   transform: "translateY(-50%)",
                   color: "#8E869C",

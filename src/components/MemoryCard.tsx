@@ -197,18 +197,12 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
             </p>
           )}
 
-          {/* Footer — dir on the row so flex-direction reverses for RTL,
-               first child (date) ends up on left in RTL, tags on right */}
+          {/* Footer — dir on the row so first child = inline-start side.
+               Tags first in DOM → start (right in RTL, left in LTR).
+               Date second → end (left in RTL, right in LTR). */}
           <div dir={dir} style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
             marginTop: 14, paddingTop: 14, borderTop: "1px solid #EFE7DE", gap: 12, flexWrap: "wrap" }}>
-            {/* Date + age — first in DOM → physical RIGHT in RTL, LEFT in LTR */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10,
-              fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
-              color: "#8E869C", whiteSpace: "nowrap", flexShrink: 0 }}>
-              <span>📅 {dateFormatted}</span>
-              {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
-            </div>
-            {/* Tags — second in DOM → physical LEFT in RTL, RIGHT in LTR */}
+            {/* Tags — first in DOM → inline-start: RIGHT in RTL, LEFT in LTR */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {memory.tags?.map((tagId) => {
                 const tagDef = PREDEFINED_TAGS.find((t) => t.id === tagId);
@@ -233,7 +227,13 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
                 </span>
               )}
             </div>
-
+            {/* Date + age — second in DOM → inline-end: LEFT in RTL, RIGHT in LTR */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10,
+              fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+              color: "#8E869C", whiteSpace: "nowrap", flexShrink: 0 }}>
+              <span>📅 {dateFormatted}</span>
+              {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
+            </div>
           </div>
         </div>
 

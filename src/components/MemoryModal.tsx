@@ -41,7 +41,6 @@ const fieldStyle: React.CSSProperties = {
   background: "#FAFAF8",
   outline: "none",
   border: "1.5px solid #EFE7DE",
-  direction: "rtl",
   resize: "none",
   boxSizing: "border-box" as const,
 };
