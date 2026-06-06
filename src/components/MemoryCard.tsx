@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Pencil, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Expand, Pencil, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { PREDEFINED_TAGS, getTagLabel } from "@/lib/tags";
 import { getAgeAtDate } from "@/lib/zodiac";
 import {
@@ -43,14 +43,33 @@ function Lightbox({ photos, startIndex, onClose }: { photos: string[]; startInde
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
       onClick={onClose}
-      onKeyDown={(e) => { if (e.key === "Escape") onClose(); if (e.key === "ArrowLeft") prev(); if (e.key === "ArrowRight") next(); }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+        if (e.key === "ArrowLeft") prev();
+        if (e.key === "ArrowRight") next();
+      }}
       tabIndex={0} autoFocus
     >
-      <button className="absolute top-4 right-4 text-white/80 hover:text-white p-2" onClick={onClose}>
-        <X className="w-6 h-6" />
+      {/* Prominent close button — top-right, frosted pill */}
+      <button
+        onClick={onClose}
+        style={{
+          position: "absolute", top: 16, right: 16,
+          width: 40, height: 40, borderRadius: "50%",
+          background: "rgba(255,255,255,0.15)",
+          border: "2px solid rgba(255,255,255,0.35)",
+          display: "grid", placeItems: "center",
+          color: "white", cursor: "pointer",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
+          zIndex: 10,
+        }}
+      >
+        <X className="w-5 h-5" />
       </button>
+
       {photos.length > 1 && (
-        <button className="absolute left-4 text-white/80 hover:text-white p-2" onClick={(e) => { e.stopPropagation(); prev(); }}>
+        <button className="absolute left-4 text-white/80 hover:text-white p-2" style={{ zIndex: 10 }}
+          onClick={(e) => { e.stopPropagation(); prev(); }}>
           <ChevronLeft className="w-8 h-8" />
         </button>
       )}
@@ -58,12 +77,13 @@ function Lightbox({ photos, startIndex, onClose }: { photos: string[]; startInde
         <Image src={photos[index]} alt={`Photo ${index + 1}`} fill className="object-contain" sizes="90vw" />
       </div>
       {photos.length > 1 && (
-        <button className="absolute right-4 text-white/80 hover:text-white p-2" onClick={(e) => { e.stopPropagation(); next(); }}>
+        <button className="absolute right-4 text-white/80 hover:text-white p-2" style={{ zIndex: 10 }}
+          onClick={(e) => { e.stopPropagation(); next(); }}>
           <ChevronRight className="w-8 h-8" />
         </button>
       )}
       {photos.length > 1 && (
-        <div className="absolute bottom-4 text-white/60 text-sm">{index + 1} / {photos.length}</div>
+        <div className="absolute bottom-4 text-white/60 text-sm font-round">{index + 1} / {photos.length}</div>
       )}
     </div>
   );
@@ -112,6 +132,53 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
     setCarouselIndex((i) => (i + 1) % photos.length);
   }
 
+  /* Button style when sitting on a photo (semi-opaque white) */
+  const btnOnPhoto: React.CSSProperties = {
+    width: 32, height: 32, borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.4)",
+    background: "rgba(255,255,255,0.92)",
+    color: "var(--color-ink-soft)",
+    cursor: "pointer", display: "grid", placeItems: "center",
+    fontSize: 16, letterSpacing: 2, lineHeight: 1,
+    boxShadow: "0 2px 8px rgba(75,67,88,0.18)",
+  };
+
+  /* Button style when sitting on a plain card (no photo) */
+  const btnOnCard: React.CSSProperties = {
+    width: 32, height: 32, borderRadius: 10,
+    border: "1px solid var(--color-line)",
+    background: "var(--color-card)",
+    color: "var(--color-ink-soft)",
+    cursor: "pointer", display: "grid", placeItems: "center",
+    fontSize: 16, letterSpacing: 2, lineHeight: 1,
+    boxShadow: "0 2px 6px rgba(75,67,88,0.08)",
+  };
+
+  /* Dropdown menu items — shared between photo-card and no-photo-card */
+  const menuItems = (
+    <div dir={dir}>
+      <DropdownMenuItem onClick={() => window.open(whatsappUrl, "_blank")}>
+        <span style={{ color: "#25D366", display: "flex", marginInlineEnd: 8 }}>
+          <WhatsAppIcon size={14} />
+        </span>
+        {t("שליחה בוואטסאפ", "Share on WhatsApp")}
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={() => onEdit(memory)}>
+        <Pencil className="h-4 w-4 me-2" />
+        {t("עריכה", "Edit")}
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        onClick={handleDelete}
+        className={confirmingDelete ? "text-destructive focus:text-destructive" : ""}
+      >
+        <Trash2 className="h-4 w-4 me-2" />
+        {confirmingDelete ? t("לחץ שוב לאישור", "Click again to confirm") : t("מחיקה", "Delete")}
+      </DropdownMenuItem>
+    </div>
+  );
+
   return (
     <>
       <article
@@ -128,61 +195,18 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
           minHeight: hasPhotos ? 180 : "auto",
         }}
       >
-        {/* ── Photo column — first in DOM → physical RIGHT in RTL ── */}
-        {hasPhotos && (
-          <div style={{ flex: "0 0 190px", position: "relative", overflow: "hidden", cursor: "pointer" }}
-            onClick={() => setLightboxIndex(carouselIndex)}>
-            <Image
-              src={photos[carouselIndex]}
-              alt={`Memory photo ${carouselIndex + 1}`}
-              fill
-              className="object-cover"
-              sizes="190px"
-            />
-
-            {/* Carousel arrows */}
-            {multi && (
-              <>
-                <button
-                  onClick={carouselPrev}
-                  style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", left: 6,
-                    width: 28, height: 28, borderRadius: "50%", border: "none", cursor: "pointer",
-                    background: "rgba(255,255,255,0.85)", display: "grid", placeItems: "center",
-                    fontSize: 16, color: "rgba(55,45,70,0.8)", boxShadow: "0 1px 5px rgba(0,0,0,0.15)", zIndex: 1 }}>
-                  ‹
-                </button>
-                <button
-                  onClick={carouselNext}
-                  style={{ position: "absolute", top: "50%", transform: "translateY(-50%)", right: 6,
-                    width: 28, height: 28, borderRadius: "50%", border: "none", cursor: "pointer",
-                    background: "rgba(255,255,255,0.85)", display: "grid", placeItems: "center",
-                    fontSize: 16, color: "rgba(55,45,70,0.8)", boxShadow: "0 1px 5px rgba(0,0,0,0.15)", zIndex: 1 }}>
-                  ›
-                </button>
-
-                {/* Dots */}
-                <div style={{ position: "absolute", bottom: 10, left: 0, right: 0,
-                  display: "flex", justifyContent: "center", gap: 5, zIndex: 1 }}>
-                  {photos.map((_, i) => (
-                    <div key={i} onClick={(e) => { e.stopPropagation(); setCarouselIndex(i); }}
-                      style={{ width: i === carouselIndex ? 8 : 6, height: i === carouselIndex ? 8 : 6,
-                        borderRadius: "50%", background: i === carouselIndex ? "#fff" : "rgba(255,255,255,0.5)",
-                        cursor: "pointer", transition: "all 0.15s" }} />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* ── Text column — second in DOM → physical LEFT in RTL ── */}
+        {/* ── Text column — FIRST in DOM
+             RTL (Hebrew):  flex-start = RIGHT  → text on the RIGHT  ✓
+             LTR (English): flex-start = LEFT   → text on the LEFT   ✓  ── */}
         <div
           dir={dir}
           style={{
             flex: 1,
-            padding: dir === "rtl"
-              ? (hasPhotos ? "20px 18px 18px 56px" : "24px 18px 18px 56px")
-              : (hasPhotos ? "20px 56px 18px 18px" : "24px 56px 18px 18px"),
+            paddingTop: hasPhotos ? 20 : 24,
+            paddingBottom: 18,
+            paddingInlineStart: 18,
+            /* leave room for the ··· button on no-photo cards */
+            paddingInlineEnd: hasPhotos ? 18 : 56,
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
@@ -190,109 +214,190 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
           }}
         >
           {story && (
-            <p style={{ margin: "0 0 0 0", fontFamily: "var(--font-sans, Rubik, sans-serif)",
+            <p style={{
+              margin: 0,
+              fontFamily: "var(--font-sans, Rubik, sans-serif)",
               fontSize: 16, lineHeight: 1.7, color: "var(--color-ink)",
-              textAlign: dir === "rtl" ? "right" : "left" }}>
+              textAlign: dir === "rtl" ? "right" : "left",
+            }}>
               {story}
             </p>
           )}
 
-          {/* Footer — dir on the row so first child = inline-start side.
-               Tags first in DOM → start (right in RTL, left in LTR).
-               Date second → end (left in RTL, right in LTR). */}
-          <div dir={dir} style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
-            marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--color-line)", gap: 12, flexWrap: "wrap" }}>
-            {/* Tags — first in DOM → inline-start: RIGHT in RTL, LEFT in LTR */}
+          {/* Footer — date FIRST (inline-start):
+               RTL → date on RIGHT, tags on LEFT
+               LTR → date on LEFT,  tags on RIGHT  */}
+          <div
+            dir={dir}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--color-line)",
+              gap: 12, flexWrap: "wrap",
+            }}
+          >
+            {/* Date + age — first → inline-start */}
+            <div style={{
+              display: "flex", alignItems: "center", gap: 10,
+              fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+              color: "var(--color-ink-soft)", whiteSpace: "nowrap", flexShrink: 0,
+            }}>
+              <span>📅 {dateFormatted}</span>
+              {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
+            </div>
+
+            {/* Tags — second → inline-end */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {memory.tags?.map((tagId) => {
                 const tagDef = PREDEFINED_TAGS.find((t) => t.id === tagId);
                 const label = getTagLabel(tagId, language);
                 return (
                   <span key={tagId} style={tagDef
-                    ? { display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 11px",
-                        borderRadius: 99, fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
-                        background: tagDef.colors.soft, color: tagDef.colors.deep, border: `1.5px solid ${tagDef.colors.mid}` }
-                    : { display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 11px",
-                        borderRadius: 99, fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
-                        background: "#F5F5F5", color: "#8E869C", border: "1.5px solid #EFE7DE" }}>
+                    ? {
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        padding: "5px 11px", borderRadius: 99,
+                        fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+                        background: tagDef.colors.soft, color: tagDef.colors.deep,
+                        border: `1.5px solid ${tagDef.colors.mid}`,
+                      }
+                    : {
+                        display: "inline-flex", alignItems: "center", gap: 5,
+                        padding: "5px 11px", borderRadius: 99,
+                        fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+                        background: "#F5F5F5", color: "#8E869C", border: "1.5px solid #EFE7DE",
+                      }}>
                     {label}
                   </span>
                 );
               })}
               {sharedWith.length > 0 && (
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 11px",
-                  borderRadius: 99, fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
-                  background: "#EDE7FB", color: "#7E5BC9", border: "1.5px solid #CBB8F2" }}>
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: 5,
+                  padding: "5px 11px", borderRadius: 99,
+                  fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+                  background: "#EDE7FB", color: "#7E5BC9", border: "1.5px solid #CBB8F2",
+                }}>
                   🤝 {t("גם עם", "Also with")} {sharedWith.map((k) => t(k.name_he, k.name_en)).join(", ")}
                 </span>
               )}
             </div>
-            {/* Date + age — second in DOM → inline-end: LEFT in RTL, RIGHT in LTR */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10,
-              fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
-              color: "var(--color-ink-soft)", whiteSpace: "nowrap", flexShrink: 0 }}>
-              <span>📅 {dateFormatted}</span>
-              {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
-            </div>
           </div>
         </div>
 
-        {/* ── ··· options button — inline-end corner (right in LTR, left in RTL) ── */}
-        {!isGuest && (
-          <div style={{ position: "absolute", top: 14, ...(dir === "rtl" ? { left: 16 } : { right: 16 }), zIndex: 3 }}>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button style={{ width: 32, height: 32, borderRadius: 10,
-                  border: "1px solid var(--color-line)", background: "var(--color-card)", color: "var(--color-ink-soft)",
-                  cursor: "pointer", display: "grid", placeItems: "center",
-                  fontSize: 16, letterSpacing: 2, lineHeight: 1,
-                  boxShadow: "0 2px 6px rgba(75,67,88,0.08)" }}>
-                  ···
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <div dir={dir}>
-                  <DropdownMenuItem onClick={() => window.open(whatsappUrl, "_blank")}>
-                    <span style={{ color: "#25D366", display: "flex", marginInlineEnd: 8 }}>
-                      <WhatsAppIcon size={14} />
-                    </span>
-                    {t("שליחה בוואטסאפ", "Share on WhatsApp")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onEdit(memory)}>
-                    <Pencil className="h-4 w-4 me-2" />
-                    {t("עריכה", "Edit")}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleDelete}
-                    className={confirmingDelete ? "text-destructive focus:text-destructive" : ""}>
-                    <Trash2 className="h-4 w-4 me-2" />
-                    {confirmingDelete ? t("לחץ שוב לאישור", "Click again to confirm") : t("מחיקה", "Delete")}
-                  </DropdownMenuItem>
+        {/* ── Photo column — SECOND in DOM
+             RTL (Hebrew):  appears on the LEFT  ✓
+             LTR (English): appears on the RIGHT ✓  ── */}
+        {hasPhotos && (
+          <div
+            className="group"
+            style={{ flex: "0 0 190px", position: "relative", overflow: "hidden", cursor: "pointer" }}
+            onClick={() => setLightboxIndex(carouselIndex)}
+          >
+            <Image
+              src={photos[carouselIndex]}
+              alt={`Memory photo ${carouselIndex + 1}`}
+              fill className="object-cover" sizes="190px"
+            />
+
+            {/* Magnifier overlay — tells the user the photo is clickable */}
+            <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center pointer-events-none">
+              <div style={{
+                width: 44, height: 44, borderRadius: "50%",
+                background: "rgba(255,255,255,0.92)",
+                display: "grid", placeItems: "center",
+                boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
+              }}>
+                <Expand className="w-5 h-5" style={{ color: "#4B4358" }} />
+              </div>
+            </div>
+
+            {/* Carousel controls */}
+            {multi && (
+              <>
+                <button onClick={carouselPrev} style={{
+                  position: "absolute", top: "50%", transform: "translateY(-50%)", left: 6, zIndex: 2,
+                  width: 28, height: 28, borderRadius: "50%", border: "none", cursor: "pointer",
+                  background: "rgba(255,255,255,0.85)", display: "grid", placeItems: "center",
+                  fontSize: 16, color: "rgba(55,45,70,0.8)", boxShadow: "0 1px 5px rgba(0,0,0,0.15)",
+                }}>‹</button>
+                <button onClick={carouselNext} style={{
+                  position: "absolute", top: "50%", transform: "translateY(-50%)", right: 6, zIndex: 2,
+                  width: 28, height: 28, borderRadius: "50%", border: "none", cursor: "pointer",
+                  background: "rgba(255,255,255,0.85)", display: "grid", placeItems: "center",
+                  fontSize: 16, color: "rgba(55,45,70,0.8)", boxShadow: "0 1px 5px rgba(0,0,0,0.15)",
+                }}>›</button>
+                <div style={{
+                  position: "absolute", bottom: 10, left: 0, right: 0,
+                  display: "flex", justifyContent: "center", gap: 5, zIndex: 2,
+                }}>
+                  {photos.map((_, i) => (
+                    <div key={i}
+                      onClick={(e) => { e.stopPropagation(); setCarouselIndex(i); }}
+                      style={{
+                        width: i === carouselIndex ? 8 : 6, height: i === carouselIndex ? 8 : 6,
+                        borderRadius: "50%",
+                        background: i === carouselIndex ? "#fff" : "rgba(255,255,255,0.5)",
+                        cursor: "pointer", transition: "all 0.15s",
+                      }}
+                    />
+                  ))}
                 </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              </>
+            )}
+
+            {/* ··· / WhatsApp — top-right of photo, visible only on hover */}
+            <div
+              className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              style={{ top: 8, right: 8, zIndex: 4 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {!isGuest ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button style={btnOnPhoto}>···</button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {menuItems}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={t("שליחה בוואטסאפ", "Share on WhatsApp")}
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ ...btnOnPhoto, color: "#25D366", textDecoration: "none" }}
+                >
+                  <WhatsAppIcon size={14} />
+                </a>
+              )}
+            </div>
           </div>
         )}
-        {/* ── WhatsApp share button for guests (no ··· menu) ── */}
-        {isGuest && (
-          <div style={{ position: "absolute", top: 14, ...(dir === "rtl" ? { left: 16 } : { right: 16 }), zIndex: 3 }}>
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t("שליחה בוואטסאפ", "Share on WhatsApp")}
-              style={{
-                width: 32, height: 32, borderRadius: 10,
-                border: "1px solid var(--color-line)", background: "var(--color-card)",
-                color: "#25D366", cursor: "pointer",
-                display: "grid", placeItems: "center",
-                textDecoration: "none",
-                boxShadow: "0 2px 6px rgba(75,67,88,0.08)",
-              }}
-            >
-              <WhatsAppIcon size={14} />
-            </a>
+
+        {/* ── Options button for NO-PHOTO cards — always visible at inline-end corner ── */}
+        {!hasPhotos && (
+          <div style={{ position: "absolute", top: 14, insetInlineEnd: 16, zIndex: 3 }}>
+            {!isGuest ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button style={btnOnCard}>···</button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {menuItems}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t("שליחה בוואטסאפ", "Share on WhatsApp")}
+                style={{ ...btnOnCard, color: "#25D366", textDecoration: "none" }}
+              >
+                <WhatsAppIcon size={14} />
+              </a>
+            )}
           </div>
         )}
       </article>
