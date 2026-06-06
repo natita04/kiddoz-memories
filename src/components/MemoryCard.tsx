@@ -132,29 +132,18 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
     setCarouselIndex((i) => (i + 1) % photos.length);
   }
 
-  /* Button style when sitting on a photo (semi-opaque white) */
-  const btnOnPhoto: React.CSSProperties = {
+  /* Unified button style — works on both photo and plain-card backgrounds */
+  const btnStyle: React.CSSProperties = {
     width: 32, height: 32, borderRadius: 10,
-    border: "1px solid rgba(255,255,255,0.4)",
+    border: "1px solid var(--color-line)",
     background: "rgba(255,255,255,0.92)",
     color: "var(--color-ink-soft)",
     cursor: "pointer", display: "grid", placeItems: "center",
     fontSize: 16, letterSpacing: 2, lineHeight: 1,
-    boxShadow: "0 2px 8px rgba(75,67,88,0.18)",
+    boxShadow: "0 2px 8px rgba(75,67,88,0.12)",
   };
 
-  /* Button style when sitting on a plain card (no photo) */
-  const btnOnCard: React.CSSProperties = {
-    width: 32, height: 32, borderRadius: 10,
-    border: "1px solid var(--color-line)",
-    background: "var(--color-card)",
-    color: "var(--color-ink-soft)",
-    cursor: "pointer", display: "grid", placeItems: "center",
-    fontSize: 16, letterSpacing: 2, lineHeight: 1,
-    boxShadow: "0 2px 6px rgba(75,67,88,0.08)",
-  };
-
-  /* Dropdown menu items — shared between photo-card and no-photo-card */
+  /* Dropdown menu items — shared across all card types */
   const menuItems = (
     <div dir={dir}>
       <DropdownMenuItem onClick={() => window.open(whatsappUrl, "_blank")}>
@@ -344,62 +333,34 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
               </>
             )}
 
-            {/* ··· / WhatsApp — top-right of photo, visible only on hover */}
-            <div
-              className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              style={{ top: 8, right: 8, zIndex: 4 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              {!isGuest ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button style={btnOnPhoto}>···</button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {menuItems}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={t("שליחה בוואטסאפ", "Share on WhatsApp")}
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ ...btnOnPhoto, color: "#25D366", textDecoration: "none" }}
-                >
-                  <WhatsAppIcon size={14} />
-                </a>
-              )}
-            </div>
           </div>
         )}
 
-        {/* ── Options button for NO-PHOTO cards — always visible at inline-end corner ── */}
-        {!hasPhotos && (
-          <div style={{ position: "absolute", top: 14, insetInlineEnd: 16, zIndex: 3 }}>
-            {!isGuest ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button style={btnOnCard}>···</button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {menuItems}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={t("שליחה בוואטסאפ", "Share on WhatsApp")}
-                style={{ ...btnOnCard, color: "#25D366", textDecoration: "none" }}
-              >
-                <WhatsAppIcon size={14} />
-              </a>
-            )}
-          </div>
-        )}
+        {/* ── Options / WhatsApp — always visible, inline-end corner of the card
+             RTL (Hebrew): inline-end = LEFT  → sits on the photo side ✓
+             LTR (English): inline-end = RIGHT → sits on the photo side ✓  ── */}
+        <div style={{ position: "absolute", top: 14, insetInlineEnd: 16, zIndex: 5 }}>
+          {!isGuest ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button style={btnStyle}>···</button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {menuItems}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={t("שליחה בוואטסאפ", "Share on WhatsApp")}
+              style={{ ...btnStyle, color: "#25D366", textDecoration: "none" }}
+            >
+              <WhatsAppIcon size={14} />
+            </a>
+          )}
+        </div>
       </article>
 
       {lightboxIndex !== null && (

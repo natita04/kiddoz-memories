@@ -121,7 +121,7 @@ export function Nav() {
       <div className="border-t border-line/60 dark:border-border/50">
         <nav
           className="container max-w-4xl mx-auto flex items-center gap-2 px-5 py-2"
-          dir="rtl"
+          dir={dir}
         >
           {kids.map((kid) => {
             const isActive = activeSlug === kid.slug;
