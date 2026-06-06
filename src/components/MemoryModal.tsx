@@ -308,7 +308,7 @@ export function MemoryModal({
           {/* Share with — stacked below date */}
           {otherKids.length > 0 && (
             <div>
-              <label style={labelStyle}>{t("שתף גם עם", "Also involves")}</label>
+              <label style={labelStyle}>{t("יחד עם", "Together with")}</label>
               <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                 {otherKids.map((ok) => {
                   const checked = sharedKidIds.includes(ok.id);

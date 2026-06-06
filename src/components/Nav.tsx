@@ -2,19 +2,23 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
+import { enterAsGuest, logout } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 import { getKidColors } from "@/lib/kidColors";
 import type { Kid } from "@/types";
 
 export function Nav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t, dir } = useLanguage();
+  const { mode, setMode } = useAuth();
   const [kids, setKids] = useState<Kid[]>([]);
   const [mounted, setMounted] = useState(false);
 
@@ -65,6 +69,27 @@ export function Nav() {
 
         {/* Controls */}
         <div className="flex items-center gap-2" dir="ltr">
+          {/* Auth mode toggle — only shown after mount (reads localStorage) */}
+          {mounted && mode === "guest" && (
+            <button
+              onClick={() => { logout(); setMode(null); router.push("/"); }}
+              className="font-round px-3 py-1 rounded-full text-xs font-semibold transition-colors"
+              style={{ color: "#E07F52", border: "1.5px solid #F7BD9C", background: "#FCE3D530" }}
+              title={t("כניסה עם סיסמה", "Sign in with password")}
+            >
+              {t("כניסה", "Sign in")}
+            </button>
+          )}
+          {mounted && mode === "full" && (
+            <button
+              onClick={() => { enterAsGuest(); setMode("guest"); }}
+              className="font-round px-3 py-1 rounded-full text-xs font-semibold border border-line dark:border-border hover:bg-secondary transition-colors"
+              style={{ color: "#8E869C" }}
+              title={t("מעבר למצב אורח", "Switch to guest view")}
+            >
+              {t("אורח", "Guest")}
+            </button>
+          )}
           <button
             onClick={() => setLanguage(language === "he" ? "en" : "he")}
             className="font-round px-3 py-1 rounded-full text-xs font-semibold border border-line dark:border-border hover:bg-secondary transition-colors"
