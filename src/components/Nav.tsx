@@ -87,7 +87,7 @@ export function Nav() {
               style={{ color: "#8E869C" }}
               title={t("מעבר למצב אורח", "Switch to guest view")}
             >
-              {t("אורח", "Guest")}
+              {t("מצב אורח", "Guest mode")}
             </button>
           )}
           <button
