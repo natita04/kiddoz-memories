@@ -67,36 +67,9 @@ export function Nav() {
           </span>
         </Link>
 
-        {/* Controls */}
+        {/* Controls — fixed order left→right: moon · language · guest/login */}
         <div className="flex items-center gap-2" dir="ltr">
-          {/* Auth mode toggle — only shown after mount (reads localStorage) */}
-          {mounted && mode === "guest" && (
-            <button
-              onClick={() => { logout(); setMode(null); router.push("/"); }}
-              className="font-round px-3 py-1 rounded-full text-xs font-semibold transition-colors"
-              style={{ color: "#E07F52", border: "1.5px solid #F7BD9C", background: "#FCE3D530" }}
-              title={t("כניסה עם סיסמה", "Sign in with password")}
-            >
-              {t("כניסה", "Sign in")}
-            </button>
-          )}
-          {mounted && mode === "full" && (
-            <button
-              onClick={() => { enterAsGuest(); setMode("guest"); }}
-              className="font-round px-3 py-1 rounded-full text-xs font-semibold border border-line dark:border-border hover:bg-secondary transition-colors"
-              style={{ color: "#8E869C" }}
-              title={t("מעבר למצב אורח", "Switch to guest view")}
-            >
-              {t("מצב אורח", "Guest mode")}
-            </button>
-          )}
-          <button
-            onClick={() => setLanguage(language === "he" ? "en" : "he")}
-            className="font-round px-3 py-1 rounded-full text-xs font-semibold border border-line dark:border-border hover:bg-secondary transition-colors"
-            style={{ color: "var(--color-ink-soft)" }}
-          >
-            {language === "he" ? "EN" : "עב"}
-          </button>
+          {/* 1. Dark/light toggle */}
           {mounted && (
             <Button
               variant="ghost"
@@ -111,6 +84,35 @@ export function Nav() {
               )}
               <span className="sr-only">Toggle theme</span>
             </Button>
+          )}
+          {/* 2. Language toggle */}
+          <button
+            onClick={() => setLanguage(language === "he" ? "en" : "he")}
+            className="font-round px-3 py-1 rounded-full text-xs font-semibold border border-line dark:border-border hover:bg-secondary transition-colors"
+            style={{ color: "var(--color-ink-soft)" }}
+          >
+            {language === "he" ? "EN" : "עב"}
+          </button>
+          {/* 3. Auth mode toggle — rightmost so appearing/disappearing doesn't shift other buttons */}
+          {mounted && mode === "guest" && (
+            <button
+              onClick={() => { logout(); setMode(null); router.push("/"); }}
+              className="font-round px-3 py-1 rounded-full text-xs font-semibold transition-colors"
+              style={{ color: "#E07F52", border: "1.5px solid #F7BD9C", background: "#FCE3D530" }}
+              title={t("כניסה עם סיסמה", "Sign in with password")}
+            >
+              {t("כניסה", "Sign in")}
+            </button>
+          )}
+          {mounted && mode === "full" && (
+            <button
+              onClick={() => { enterAsGuest(); setMode("guest"); }}
+              className="font-round px-3 py-1 rounded-full text-xs font-semibold border border-line dark:border-border hover:bg-secondary transition-colors"
+              style={{ color: "var(--color-ink-soft)" }}
+              title={t("מעבר למצב אורח", "Switch to guest view")}
+            >
+              {t("מצב אורח", "Guest mode")}
+            </button>
           )}
         </div>
       </div>
