@@ -61,7 +61,7 @@ export function Nav() {
           </div>
           <span
             className="font-display text-lg leading-none"
-            style={{ color: "#4B4358" }}
+            style={{ color: "var(--color-ink)" }}
           >
             {t("הזכרונות שלנו", "Our Memories")}
           </span>
@@ -93,7 +93,7 @@ export function Nav() {
           <button
             onClick={() => setLanguage(language === "he" ? "en" : "he")}
             className="font-round px-3 py-1 rounded-full text-xs font-semibold border border-line dark:border-border hover:bg-secondary transition-colors"
-            style={{ color: "#8E869C" }}
+            style={{ color: "var(--color-ink-soft)" }}
           >
             {language === "he" ? "EN" : "עב"}
           </button>
@@ -140,7 +140,7 @@ export function Nav() {
                     : {
                         background: "transparent",
                         border: "2px solid transparent",
-                        color: "#8E869C",
+                        color: "var(--color-ink-soft)",
                       }
                 }
                 className="flex items-center gap-2 px-3 py-1 rounded-full transition-colors"
@@ -175,9 +175,9 @@ export function Nav() {
             className="font-round flex items-center gap-2 px-3 py-1 text-sm cursor-not-allowed"
             style={{
               borderRadius: 99,
-              border: "2px dashed #EFE7DE",
+              border: "2px dashed var(--color-line)",
               background: "transparent",
-              color: "#8E869C",
+              color: "var(--color-ink-soft)",
               opacity: 0.6,
             }}
             title={t("הולד/ת בקרוב", "Coming soon")}

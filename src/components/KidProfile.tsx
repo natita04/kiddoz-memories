@@ -157,37 +157,55 @@ export function KidProfile({ kid }: KidProfileProps) {
       style={{
         borderRadius: 28,
         padding: "26px 28px",
-        background: `linear-gradient(135deg, ${c.soft} 0%, ${c.mid}40 100%)`,
+        background: `linear-gradient(135deg, ${c.soft} 0%, ${c.mid} 100%)`,
+        boxShadow: "0 8px 32px rgba(75,67,88,0.12)",
         position: "relative",
         overflow: "hidden",
       }}
     >
       {/* Decorative blobs */}
+      {/* blob top-end */}
       <div
         style={{
           position: "absolute",
           top: -40,
           right: -30,
-          width: 140,
-          height: 140,
+          width: 180,
+          height: 180,
           borderRadius: "50%",
-          background: c.mid,
-          filter: "blur(2px)",
-          opacity: 0.35,
+          background: c.deep,
+          filter: "blur(4px)",
+          opacity: 0.18,
           pointerEvents: "none",
         }}
       />
+      {/* blob mid-start */}
       <div
         style={{
           position: "absolute",
           bottom: -50,
           left: 60,
-          width: 120,
-          height: 120,
+          width: 160,
+          height: 160,
           borderRadius: "50%",
-          background: c.soft,
-          filter: "blur(2px)",
-          opacity: 0.5,
+          background: c.mid,
+          filter: "blur(3px)",
+          opacity: 0.55,
+          pointerEvents: "none",
+        }}
+      />
+      {/* blob small accent */}
+      <div
+        style={{
+          position: "absolute",
+          top: "30%",
+          right: "35%",
+          width: 80,
+          height: 80,
+          borderRadius: "50%",
+          background: c.deep,
+          filter: "blur(20px)",
+          opacity: 0.12,
           pointerEvents: "none",
         }}
       />

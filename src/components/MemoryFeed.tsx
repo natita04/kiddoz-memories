@@ -90,14 +90,14 @@ export function MemoryFeed({
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
           <h3
             className="font-display"
-            style={{ margin: 0, fontSize: 24, color: "#4B4358" }}
+            style={{ margin: 0, fontSize: 24, color: "var(--color-ink)" }}
           >
             {t("זיכרונות", "Memories")}
           </h3>
           {memories.length > 0 && (
             <span
               className="font-round"
-              style={{ fontSize: 16, color: "#8E869C" }}
+              style={{ fontSize: 16, color: "var(--color-ink-soft)" }}
             >
               {memories.length}
             </span>
@@ -154,12 +154,12 @@ export function MemoryFeed({
                 width: "100%",
                 // icon side gets 44px, clear-button side gets 36px
                 padding: dir === "rtl" ? "12px 44px 12px 36px" : "12px 36px 12px 44px",
-                background: "#fff",
+                background: "var(--color-card)",
                 borderRadius: 16,
-                border: "1px solid #EFE7DE",
+                border: "1px solid var(--color-line)",
                 fontFamily: "var(--font-sans, Rubik, sans-serif)",
                 fontSize: 14,
-                color: "#4B4358",
+                color: "var(--color-ink)",
                 outline: "none",
                 boxSizing: "border-box",
                 direction: dir,
@@ -249,7 +249,7 @@ export function MemoryFeed({
           <div style={{ fontSize: 40, marginBottom: 12 }}>📷</div>
           <p
             className="font-round"
-            style={{ color: "#8E869C", fontSize: 14, margin: 0 }}
+            style={{ color: "var(--color-ink-soft)", fontSize: 14, margin: 0 }}
           >
             {t(
               "עדיין אין זיכרונות. הוסיפו את הראשון!",
@@ -277,7 +277,7 @@ export function MemoryFeed({
         </div>
       ) : filtered.length === 0 ? (
         <div style={{ textAlign: "center", padding: "48px 0" }}>
-          <p className="font-round" style={{ color: "#8E869C", fontSize: 14, margin: 0 }}>
+          <p className="font-round" style={{ color: "var(--color-ink-soft)", fontSize: 14, margin: 0 }}>
             {t("לא נמצאו זיכרונות", "No memories found")}
           </p>
           {hasFilters && (

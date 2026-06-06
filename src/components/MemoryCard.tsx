@@ -117,11 +117,11 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
       <article
         className="animate-fade-in"
         style={{
-          background: "#fff",
+          background: "var(--color-card)",
           borderRadius: 24,
           overflow: "hidden",
           boxShadow: "0 6px 22px rgba(75,67,88,0.08)",
-          border: "1px solid #EFE7DE",
+          border: "1px solid var(--color-line)",
           position: "relative",
           display: "flex",
           alignItems: "stretch",
@@ -191,7 +191,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
         >
           {story && (
             <p style={{ margin: "0 0 0 0", fontFamily: "var(--font-sans, Rubik, sans-serif)",
-              fontSize: 16, lineHeight: 1.7, color: "#4B4358",
+              fontSize: 16, lineHeight: 1.7, color: "var(--color-ink)",
               textAlign: dir === "rtl" ? "right" : "left" }}>
               {story}
             </p>
@@ -201,7 +201,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
                Tags first in DOM → start (right in RTL, left in LTR).
                Date second → end (left in RTL, right in LTR). */}
           <div dir={dir} style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
-            marginTop: 14, paddingTop: 14, borderTop: "1px solid #EFE7DE", gap: 12, flexWrap: "wrap" }}>
+            marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--color-line)", gap: 12, flexWrap: "wrap" }}>
             {/* Tags — first in DOM → inline-start: RIGHT in RTL, LEFT in LTR */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {memory.tags?.map((tagId) => {
@@ -230,7 +230,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
             {/* Date + age — second in DOM → inline-end: LEFT in RTL, RIGHT in LTR */}
             <div style={{ display: "flex", alignItems: "center", gap: 10,
               fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
-              color: "#8E869C", whiteSpace: "nowrap", flexShrink: 0 }}>
+              color: "var(--color-ink-soft)", whiteSpace: "nowrap", flexShrink: 0 }}>
               <span>📅 {dateFormatted}</span>
               {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
             </div>
@@ -243,7 +243,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button style={{ width: 32, height: 32, borderRadius: 10,
-                  border: "1px solid #EFE7DE", background: "#fff", color: "#8E869C",
+                  border: "1px solid var(--color-line)", background: "var(--color-card)", color: "var(--color-ink-soft)",
                   cursor: "pointer", display: "grid", placeItems: "center",
                   fontSize: 16, letterSpacing: 2, lineHeight: 1,
                   boxShadow: "0 2px 6px rgba(75,67,88,0.08)" }}>
@@ -282,7 +282,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
               title={t("שליחה בוואטסאפ", "Share on WhatsApp")}
               style={{
                 width: 32, height: 32, borderRadius: 10,
-                border: "1px solid #EFE7DE", background: "#fff",
+                border: "1px solid var(--color-line)", background: "var(--color-card)",
                 color: "#25D366", cursor: "pointer",
                 display: "grid", placeItems: "center",
                 textDecoration: "none",

@@ -52,6 +52,12 @@
     --ink:   #4B4358;
     --ink-soft: #8E869C;
     --line:  #EFE7DE;
+
+    /* Direct color tokens for inline styles */
+    --color-ink: #4B4358;
+    --color-ink-soft: #8E869C;
+    --color-line: #EFE7DE;
+    --color-card: #FFFFFF;
   }
 
   .dark {
@@ -66,7 +72,7 @@
     --secondary: 265 10% 22%;
     --secondary-foreground: 30 30% 94%;
     --muted: 265 10% 22%;
-    --muted-foreground: 265 8% 58%;
+    --muted-foreground: 265 8% 68%;    /* lifted for readability on dark bg */
     --accent: 21 65% 60%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
@@ -74,6 +80,12 @@
     --border: 265 10% 24%;
     --input: 265 10% 24%;
     --ring: 21 65% 60%;
+
+    /* Direct color tokens — dark overrides */
+    --color-ink: #EBE4D8;
+    --color-ink-soft: #C4BDD2;
+    --color-line: #3A3347;
+    --color-card: hsl(265, 14%, 19%);
   }
 
   * {
