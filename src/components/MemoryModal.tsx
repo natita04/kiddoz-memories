@@ -241,7 +241,6 @@ export function MemoryModal({
           maxWidth: 580,
           borderRadius: 28,
           boxShadow: "0 20px 60px rgba(75,67,88,0.22)",
-          overflow: "hidden",
         }}
       >
         {/* Header */}
