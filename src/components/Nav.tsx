@@ -88,10 +88,10 @@ export function Nav() {
           {/* 2. Language toggle */}
           <button
             onClick={() => setLanguage(language === "he" ? "en" : "he")}
-            className="font-round px-3 py-1 rounded-full text-xs font-semibold border border-line dark:border-border hover:bg-secondary transition-colors"
-            style={{ color: "var(--color-ink-soft)" }}
+            className="font-round px-2 py-0.5 rounded-full text-lg border border-line dark:border-border hover:bg-secondary transition-colors"
+            title={language === "he" ? "Switch to English" : "עבור לעברית"}
           >
-            {language === "he" ? "EN" : "עב"}
+            {language === "he" ? "🇬🇧" : "🇮🇱"}
           </button>
           {/* 3. Auth mode toggle — rightmost so appearing/disappearing doesn't shift other buttons */}
           {mounted && mode === "guest" && (
