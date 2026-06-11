@@ -34,14 +34,34 @@ function WhatsAppIcon({ size = 14 }: { size?: number }) {
 }
 
 /* ─── Lightbox ────────────────────────────────────────────── */
-function Lightbox({ photos, startIndex, onClose }: { photos: string[]; startIndex: number; onClose: () => void }) {
+function Lightbox({
+  photos, startIndex, onClose, memory, kidBirthdate, allKids,
+}: {
+  photos: string[];
+  startIndex: number;
+  onClose: () => void;
+  memory: Memory;
+  kidBirthdate: string;
+  allKids: Kid[];
+}) {
   const [index, setIndex] = useState(startIndex);
+  const { language, t, dir } = useLanguage();
+
   const prev = () => setIndex((i) => (i - 1 + photos.length) % photos.length);
   const next = () => setIndex((i) => (i + 1) % photos.length);
 
+  const story = language === "he" ? memory.story_he ?? memory.story_en : memory.story_en ?? memory.story_he;
+  const ageAtMemory = getAgeAtDate(kidBirthdate, memory.memory_date);
+  const dateFormatted = new Date(memory.memory_date).toLocaleDateString(
+    language === "he" ? "he-IL" : "en-US",
+    { day: "numeric", month: "long", year: "numeric" }
+  );
+  const sharedWith = allKids.filter((k) => memory.shared_kid_ids?.includes(k.id));
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+      className="fixed inset-0 z-50 flex flex-col sm:flex-row"
+      style={{ background: "rgba(0,0,0,0.96)" }}
       onClick={onClose}
       onKeyDown={(e) => {
         if (e.key === "Escape") onClose();
@@ -50,41 +70,138 @@ function Lightbox({ photos, startIndex, onClose }: { photos: string[]; startInde
       }}
       tabIndex={0} autoFocus
     >
-      {/* Prominent close button — top-right, frosted pill */}
-      <button
-        onClick={onClose}
-        style={{
-          position: "absolute", top: 16, right: 16,
-          width: 40, height: 40, borderRadius: "50%",
-          background: "rgba(255,255,255,0.15)",
-          border: "2px solid rgba(255,255,255,0.35)",
-          display: "grid", placeItems: "center",
-          color: "white", cursor: "pointer",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
-          zIndex: 10,
-        }}
+      {/* ── Photo area ── */}
+      <div
+        className="relative flex-1 min-h-0 flex items-center justify-center"
+        onClick={(e) => e.stopPropagation()}
       >
-        <X className="w-5 h-5" />
-      </button>
+        <div className="relative w-full h-full">
+          <Image
+            src={photos[index]}
+            alt={`Photo ${index + 1}`}
+            fill className="object-contain"
+            sizes="(max-width: 640px) 100vw, 65vw"
+          />
+        </div>
 
-      {photos.length > 1 && (
-        <button className="absolute left-4 text-white/80 hover:text-white p-2" style={{ zIndex: 10 }}
-          onClick={(e) => { e.stopPropagation(); prev(); }}>
-          <ChevronLeft className="w-8 h-8" />
-        </button>
-      )}
-      <div className="relative max-w-[90vw] max-h-[90vh] w-full h-full" onClick={(e) => e.stopPropagation()}>
-        <Image src={photos[index]} alt={`Photo ${index + 1}`} fill className="object-contain" sizes="90vw" />
+        {photos.length > 1 && (
+          <>
+            <button
+              onClick={(e) => { e.stopPropagation(); prev(); }}
+              className="absolute left-3 text-white/80 hover:text-white p-2"
+            >
+              <ChevronLeft className="w-7 h-7" />
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); next(); }}
+              className="absolute right-3 text-white/80 hover:text-white p-2"
+            >
+              <ChevronRight className="w-7 h-7" />
+            </button>
+            <div className="absolute bottom-4 text-white/50 font-round text-sm">
+              {index + 1} / {photos.length}
+            </div>
+          </>
+        )}
       </div>
-      {photos.length > 1 && (
-        <button className="absolute right-4 text-white/80 hover:text-white p-2" style={{ zIndex: 10 }}
-          onClick={(e) => { e.stopPropagation(); next(); }}>
-          <ChevronRight className="w-8 h-8" />
-        </button>
-      )}
-      {photos.length > 1 && (
-        <div className="absolute bottom-4 text-white/60 text-sm font-round">{index + 1} / {photos.length}</div>
-      )}
+
+      {/* ── Content panel ── */}
+      <div
+        className="sm:w-80 max-h-[42vh] sm:max-h-none overflow-y-auto flex flex-col"
+        style={{ background: "var(--color-card)", borderInlineStart: "1px solid var(--color-line)" }}
+        dir={dir}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div style={{
+          padding: "14px 16px",
+          borderBottom: "1px solid var(--color-line)",
+          display: "flex", alignItems: "center", gap: 10, flexShrink: 0,
+        }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 12,
+            background: "#FCE3D5", display: "grid", placeItems: "center",
+            fontSize: 18, flexShrink: 0,
+          }}>💛</div>
+          <span className="font-display" style={{ fontSize: 15, color: "var(--color-ink)" }}>
+            {t("זכרונות משפחת רז", "Memories - Raz Family")}
+          </span>
+
+          {/* Close button inside panel header */}
+          <button
+            onClick={onClose}
+            style={{
+              marginInlineStart: "auto",
+              width: 32, height: 32, borderRadius: "50%",
+              background: "transparent",
+              border: "1px solid var(--color-line)",
+              display: "grid", placeItems: "center",
+              color: "var(--color-ink-soft)", cursor: "pointer", flexShrink: 0,
+            }}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Story */}
+        {story && (
+          <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--color-line)" }}>
+            <p style={{
+              margin: 0,
+              fontFamily: "var(--font-sans, Rubik, sans-serif)",
+              fontSize: 14, lineHeight: 1.75, color: "var(--color-ink)",
+              textAlign: dir === "rtl" ? "right" : "left",
+            }}>
+              {story}
+            </p>
+          </div>
+        )}
+
+        {/* Tags */}
+        {(memory.tags && memory.tags.length > 0 || sharedWith.length > 0) && (
+          <div style={{ padding: "10px 16px", borderBottom: "1px solid var(--color-line)", display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {memory.tags?.map((tagId) => {
+              const tagDef = PREDEFINED_TAGS.find((t) => t.id === tagId);
+              const label = getTagLabel(tagId, language);
+              return (
+                <span key={tagId} style={tagDef ? {
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "4px 10px", borderRadius: 99,
+                  fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+                  background: tagDef.colors.soft, color: tagDef.colors.deep,
+                  border: `1.5px solid ${tagDef.colors.mid}`,
+                } : {
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "4px 10px", borderRadius: 99,
+                  fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+                  background: "#F5F5F5", color: "#8E869C", border: "1.5px solid #EFE7DE",
+                }}>{label}</span>
+              );
+            })}
+            {sharedWith.length > 0 && (
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                padding: "4px 10px", borderRadius: 99,
+                fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+                background: "#EDE7FB", color: "#7E5BC9", border: "1.5px solid #CBB8F2",
+              }}>
+                🤝 {t("גם עם", "Also with")} {sharedWith.map((k) => t(k.name_he, k.name_en)).join(", ")}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Date + age footer */}
+        <div style={{
+          padding: "12px 16px", marginTop: "auto",
+          fontFamily: "var(--font-round, sans-serif)", fontSize: 13,
+          color: "var(--color-ink-soft)",
+          textAlign: dir === "rtl" ? "right" : "left",
+        }}>
+          <div>📅 {dateFormatted}</div>
+          {ageAtMemory && <div style={{ marginTop: 2 }}>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</div>}
+        </div>
+      </div>
     </div>
   );
 }
@@ -176,7 +293,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
         {hasPhotos && (
           <div
             className="group"
-            style={{ position: "relative", height: 200, overflow: "hidden", cursor: "pointer" }}
+            style={{ position: "relative", height: 300, overflow: "hidden", cursor: "pointer" }}
             onClick={() => setLightboxIndex(carouselIndex)}
           >
             <Image
@@ -278,7 +395,21 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
               paddingTop: 8, borderTop: "1px solid var(--color-line)", gap: 6,
             }}
           >
-            {/* Action button — inline-start */}
+            {/* Date + age — inline-start
+                 Hebrew RTL → sits on the RIGHT
+                 English LTR → sits on the LEFT  */}
+            <div style={{
+              fontFamily: "var(--font-round, sans-serif)", fontSize: 11.5,
+              color: "var(--color-ink-soft)", lineHeight: 1.4,
+              textAlign: dir === "rtl" ? "right" : "left",
+            }}>
+              <div>{dateFormatted}</div>
+              {ageAtMemory && <div>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</div>}
+            </div>
+
+            {/* Action button — inline-end
+                 Hebrew RTL → sits on the LEFT
+                 English LTR → sits on the RIGHT  */}
             {!isGuest ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -299,22 +430,19 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
                 <WhatsAppIcon size={14} />
               </a>
             )}
-
-            {/* Date + age — inline-end */}
-            <div style={{
-              fontFamily: "var(--font-round, sans-serif)", fontSize: 11.5,
-              color: "var(--color-ink-soft)", lineHeight: 1.4,
-              textAlign: dir === "rtl" ? "left" : "right",
-            }}>
-              <div>{dateFormatted}</div>
-              {ageAtMemory && <div>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</div>}
-            </div>
           </div>
         </div>
       </article>
 
       {lightboxIndex !== null && (
-        <Lightbox photos={photos} startIndex={lightboxIndex} onClose={() => setLightboxIndex(null)} />
+        <Lightbox
+          photos={photos}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          memory={memory}
+          kidBirthdate={kidBirthdate}
+          allKids={allKids}
+        />
       )}
     </>
   );
