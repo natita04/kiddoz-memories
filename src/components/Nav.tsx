@@ -63,7 +63,7 @@ export function Nav() {
             className="font-display text-lg leading-none"
             style={{ color: "var(--color-ink)" }}
           >
-            {t("הזכרונות שלנו", "Our Memories")}
+            {t("זכרונות משפחת רז", "Memories - Raz Family")}
           </span>
         </Link>
 

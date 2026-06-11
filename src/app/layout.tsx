@@ -26,7 +26,7 @@ const rubik = Rubik({
 });
 
 export const metadata: Metadata = {
-  title: "הזיכרונות שלנו · Our Memories",
+  title: "זכרונות משפחת רז · Memories - Raz Family",
   description: "A private family scrapbook",
 };
 
