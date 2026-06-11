@@ -302,19 +302,42 @@ export function MemoryFeed({
           )}
         </div>
       ) : (
-        <div className="columns-1 sm:columns-2" style={{ columnGap: 12 }}>
-          {filtered.map((memory) => (
-            <div key={memory.id} style={{ breakInside: "avoid", marginBottom: 12 }}>
+        <>
+          {/* Mobile: single column */}
+          <div className="flex flex-col gap-3 sm:hidden">
+            {filtered.map((memory) => (
               <MemoryCard
+                key={memory.id}
                 memory={memory}
                 kidBirthdate={kidBirthdate}
                 allKids={allKids}
                 onEdit={openEditModal}
                 onDelete={handleDelete}
               />
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+
+          {/* Desktop: two interleaved columns — dir flips which side is "first" */}
+          <div className="hidden sm:flex items-start gap-3" dir={dir}>
+            {[
+              filtered.filter((_, i) => i % 2 === 0),
+              filtered.filter((_, i) => i % 2 === 1),
+            ].map((col, ci) => (
+              <div key={ci} className="flex-1 flex flex-col gap-3">
+                {col.map((memory) => (
+                  <MemoryCard
+                    key={memory.id}
+                    memory={memory}
+                    kidBirthdate={kidBirthdate}
+                    allKids={allKids}
+                    onEdit={openEditModal}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </>
       )}
 
       <MemoryModal

@@ -216,9 +216,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
         {/* ── Text area ── */}
         <div
           dir={dir}
-          style={{
-            padding: hasPhotos ? "12px 12px 10px" : "14px 46px 14px 14px",
-          }}
+          style={{ padding: "12px 12px 10px" }}
         >
           {story && (
             <p style={{
@@ -270,46 +268,48 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
             </div>
           )}
 
-          {/* Footer: date + age */}
+          {/* Footer: button (inline-start) + date/age (inline-end)
+               Hebrew RTL → button on RIGHT, date/age on LEFT
+               English LTR → button on LEFT, date/age on RIGHT  */}
           <div
             dir={dir}
             style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
-              paddingTop: 8, borderTop: "1px solid var(--color-line)",
-              fontFamily: "var(--font-round, sans-serif)", fontSize: 11.5,
-              color: "var(--color-ink-soft)", gap: 6,
+              paddingTop: 8, borderTop: "1px solid var(--color-line)", gap: 6,
             }}
           >
-            <span>{dateFormatted}</span>
-            {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
-          </div>
-        </div>
+            {/* Action button — inline-start */}
+            {!isGuest ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button style={btnStyle}>···</button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {menuItems}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={t("שליחה בוואטסאפ", "Share on WhatsApp")}
+                style={{ ...btnStyle, color: "#25D366", textDecoration: "none" }}
+              >
+                <WhatsAppIcon size={14} />
+              </a>
+            )}
 
-        {/* ── ··· / WhatsApp button — top inline-end corner ── */}
-        <div style={{ position: "absolute", top: 10, insetInlineEnd: 10, zIndex: 5 }}>
-          {!isGuest ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button style={{
-                  ...btnStyle,
-                  background: hasPhotos ? "rgba(255,255,255,0.88)" : "var(--color-card)",
-                }}>···</button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {menuItems}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t("שליחה בוואטסאפ", "Share on WhatsApp")}
-              style={{ ...btnStyle, color: "#25D366", textDecoration: "none" }}
-            >
-              <WhatsAppIcon size={14} />
-            </a>
-          )}
+            {/* Date + age — inline-end */}
+            <div style={{
+              fontFamily: "var(--font-round, sans-serif)", fontSize: 11.5,
+              color: "var(--color-ink-soft)", lineHeight: 1.4,
+              textAlign: dir === "rtl" ? "left" : "right",
+            }}>
+              <div>{dateFormatted}</div>
+              {ageAtMemory && <div>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</div>}
+            </div>
+          </div>
         </div>
       </article>
 
