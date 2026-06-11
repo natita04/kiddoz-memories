@@ -40,7 +40,7 @@ export function Nav() {
       {/* Row 1: Logo + controls — always LTR */}
       <div
         className="container max-w-4xl mx-auto flex h-14 items-center justify-between px-5"
-        dir="rtl"
+        dir={dir}
       >
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2.5">
@@ -68,7 +68,7 @@ export function Nav() {
         </Link>
 
         {/* Controls — fixed order left→right: moon · language · guest/login */}
-        <div className="flex items-center gap-2" dir="ltr">
+        <div className="flex items-center gap-2">
           {/* 1. Dark/light toggle */}
           {mounted && (
             <Button

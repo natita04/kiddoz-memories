@@ -46,17 +46,13 @@ values
 on conflict (id) do nothing;
 
 -- Storage policies — allow all operations from anon (family app, no user accounts)
-create policy "Public read avatars"
-  on storage.objects for select
-  using (bucket_id = 'avatars');
+-- No SELECT policy needed: buckets are public=true so files are served by URL
+-- without requiring an API-level read policy. A SELECT policy would also allow
+-- listing all filenames in the bucket, which is unnecessary exposure.
 
 create policy "Anon upload avatars"
   on storage.objects for insert
   with check (bucket_id = 'avatars');
-
-create policy "Public read memory photos"
-  on storage.objects for select
-  using (bucket_id = 'memory-photos');
 
 create policy "Anon upload memory photos"
   on storage.objects for insert
@@ -66,6 +62,16 @@ create policy "Anon delete memory photos"
   on storage.objects for delete
   using (bucket_id = 'memory-photos');
 
--- Note: RLS is intentionally left disabled on kids/memories tables.
--- Access is controlled by the client-side password gate.
--- For a more secure setup, enable RLS and add policies tied to a session secret.
+-- RLS enabled on both tables. Anon role gets full access because this is a
+-- password-gated family app with no per-user row isolation needed.
+-- The service role (used server-side) bypasses RLS by default.
+alter table public.kids     enable row level security;
+alter table public.memories enable row level security;
+
+create policy "Anon full access kids"
+  on public.kids for all to anon
+  using (true) with check (true);
+
+create policy "Anon full access memories"
+  on public.memories for all to anon
+  using (true) with check (true);

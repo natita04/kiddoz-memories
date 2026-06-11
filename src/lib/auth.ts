@@ -1,5 +1,5 @@
 export const AUTH_KEY = "kiddoz_auth";
-export const PASSWORD = process.env.NEXT_PUBLIC_APP_PASSWORD ?? "raz";
+export const PASSWORD = process.env.NEXT_PUBLIC_APP_PASSWORD ?? "razfam";
 
 export type AuthMode = "full" | "guest" | null;
 
