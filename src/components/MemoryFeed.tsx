@@ -309,6 +309,7 @@ export function MemoryFeed({
               <MemoryCard
                 key={memory.id}
                 memory={memory}
+                kidId={kidId}
                 kidBirthdate={kidBirthdate}
                 allKids={allKids}
                 onEdit={openEditModal}
@@ -328,6 +329,7 @@ export function MemoryFeed({
                   <MemoryCard
                     key={memory.id}
                     memory={memory}
+                    kidId={kidId}
                     kidBirthdate={kidBirthdate}
                     allKids={allKids}
                     onEdit={openEditModal}

@@ -18,6 +18,7 @@ import type { Kid, Memory } from "@/types";
 
 interface MemoryCardProps {
   memory: Memory;
+  kidId: string;
   kidBirthdate: string;
   allKids: Kid[];
   onEdit: (memory: Memory) => void;
@@ -35,12 +36,13 @@ function WhatsAppIcon({ size = 14 }: { size?: number }) {
 
 /* ─── Lightbox ────────────────────────────────────────────── */
 function Lightbox({
-  photos, startIndex, onClose, memory, kidBirthdate, allKids,
+  photos, startIndex, onClose, memory, kidId, kidBirthdate, allKids,
 }: {
   photos: string[];
   startIndex: number;
   onClose: () => void;
   memory: Memory;
+  kidId: string;
   kidBirthdate: string;
   allKids: Kid[];
 }) {
@@ -57,11 +59,13 @@ function Lightbox({
     { day: "numeric", month: "long", year: "numeric" }
   );
   const sharedWith = allKids.filter((k) => memory.shared_kid_ids?.includes(k.id));
+  const currentKid = allKids.find((k) => k.id === kidId);
+  const kidName = currentKid ? t(currentKid.name_he, currentKid.name_en) : "";
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col sm:flex-row"
-      style={{ background: "rgba(0,0,0,0.96)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.80)" }}
       onClick={onClose}
       onKeyDown={(e) => {
         if (e.key === "Escape") onClose();
@@ -70,10 +74,16 @@ function Lightbox({
       }}
       tabIndex={0} autoFocus
     >
+      {/* ── Sized container ── */}
+      <div
+        className="flex flex-col sm:flex-row overflow-hidden rounded-2xl"
+        style={{ width: "70vw", height: "90vh", maxWidth: "1200px" }}
+        onClick={(e) => e.stopPropagation()}
+      >
       {/* ── Photo area ── */}
       <div
         className="relative flex-1 min-h-0 flex items-center justify-center"
-        onClick={(e) => e.stopPropagation()}
+        style={{ background: "#000" }}
       >
         <div className="relative w-full h-full">
           <Image
@@ -107,10 +117,9 @@ function Lightbox({
 
       {/* ── Content panel ── */}
       <div
-        className="sm:w-80 max-h-[42vh] sm:max-h-none overflow-y-auto flex flex-col"
+        className="w-80 shrink-0 overflow-y-auto flex flex-col"
         style={{ background: "var(--color-card)", borderInlineStart: "1px solid var(--color-line)" }}
         dir={dir}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div style={{
@@ -124,7 +133,7 @@ function Lightbox({
             fontSize: 18, flexShrink: 0,
           }}>💛</div>
           <span className="font-display" style={{ fontSize: 15, color: "var(--color-ink)" }}>
-            {t("זכרונות משפחת רז", "Memories - Raz Family")}
+            {kidName}
           </span>
 
           {/* Close button inside panel header */}
@@ -202,12 +211,13 @@ function Lightbox({
           {ageAtMemory && <div style={{ marginTop: 2 }}>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</div>}
         </div>
       </div>
+      </div>
     </div>
   );
 }
 
 /* ─── Card ────────────────────────────────────────────────── */
-export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: MemoryCardProps) {
+export function MemoryCard({ memory, kidId, kidBirthdate, allKids, onEdit, onDelete }: MemoryCardProps) {
   const { language, t, dir } = useLanguage();
   const { isGuest } = useAuth();
   const ageAtMemory = getAgeAtDate(kidBirthdate, memory.memory_date);
@@ -440,6 +450,7 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
           startIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           memory={memory}
+          kidId={kidId}
           kidBirthdate={kidBirthdate}
           allKids={allKids}
         />
