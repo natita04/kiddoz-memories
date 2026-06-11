@@ -123,15 +123,6 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
     else { setConfirmingDelete(true); setTimeout(() => setConfirmingDelete(false), 3000); }
   }
 
-  function carouselPrev(e: React.MouseEvent) {
-    e.stopPropagation();
-    setCarouselIndex((i) => (i - 1 + photos.length) % photos.length);
-  }
-  function carouselNext(e: React.MouseEvent) {
-    e.stopPropagation();
-    setCarouselIndex((i) => (i + 1) % photos.length);
-  }
-
   /* Unified button style — works on both photo and plain-card backgrounds */
   const btnStyle: React.CSSProperties = {
     width: 32, height: 32, borderRadius: 10,
@@ -174,84 +165,92 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
         className="animate-fade-in"
         style={{
           background: "var(--color-card)",
-          borderRadius: 24,
+          borderRadius: 20,
           overflow: "hidden",
-          boxShadow: "0 6px 22px rgba(75,67,88,0.08)",
+          boxShadow: "0 4px 16px rgba(75,67,88,0.08)",
           border: "1px solid var(--color-line)",
           position: "relative",
-          display: "flex",
-          alignItems: "stretch",
-          minHeight: hasPhotos ? 180 : "auto",
         }}
       >
-        {/* ── Text column — FIRST in DOM
-             RTL (Hebrew):  flex-start = RIGHT  → text on the RIGHT  ✓
-             LTR (English): flex-start = LEFT   → text on the LEFT   ✓  ── */}
+        {/* ── Photo on top ── */}
+        {hasPhotos && (
+          <div
+            className="group"
+            style={{ position: "relative", height: 200, overflow: "hidden", cursor: "pointer" }}
+            onClick={() => setLightboxIndex(carouselIndex)}
+          >
+            <Image
+              src={photos[carouselIndex]}
+              alt={`Memory photo ${carouselIndex + 1}`}
+              fill className="object-cover" sizes="50vw"
+            />
+
+            {/* Magnifier hover overlay */}
+            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center pointer-events-none">
+              <div style={{
+                width: 40, height: 40, borderRadius: "50%",
+                background: "rgba(255,255,255,0.9)",
+                display: "grid", placeItems: "center",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+              }}>
+                <Expand className="w-4 h-4" style={{ color: "#4B4358" }} />
+              </div>
+            </div>
+
+            {/* Multi-photo badge */}
+            {multi && (
+              <div
+                className="font-round"
+                style={{
+                  position: "absolute", bottom: 10, insetInlineStart: 10,
+                  background: "rgba(0,0,0,0.52)", color: "#fff",
+                  borderRadius: 99, padding: "3px 9px", fontSize: 11.5,
+                }}
+              >
+                +{photos.length - 1} {t("תמונות", "photos")}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Text area ── */}
         <div
           dir={dir}
           style={{
-            flex: 1,
-            paddingTop: hasPhotos ? 20 : 24,
-            paddingBottom: 18,
-            paddingInlineStart: 18,
-            /* leave room for the ··· button on no-photo cards */
-            paddingInlineEnd: hasPhotos ? 18 : 56,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            minWidth: 0,
+            padding: hasPhotos ? "12px 12px 10px" : "14px 46px 14px 14px",
           }}
         >
           {story && (
             <p style={{
               margin: 0,
               fontFamily: "var(--font-sans, Rubik, sans-serif)",
-              fontSize: 16, lineHeight: 1.7, color: "var(--color-ink)",
+              fontSize: 14, lineHeight: 1.65, color: "var(--color-ink)",
               textAlign: dir === "rtl" ? "right" : "left",
+              marginBottom: 10,
             }}>
               {story}
             </p>
           )}
 
-          {/* Footer — date FIRST (inline-start):
-               RTL → date on RIGHT, tags on LEFT
-               LTR → date on LEFT,  tags on RIGHT  */}
-          <div
-            dir={dir}
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--color-line)",
-              gap: 12, flexWrap: "wrap",
-            }}
-          >
-            {/* Date + age — first → inline-start */}
-            <div style={{
-              display: "flex", alignItems: "center", gap: 10,
-              fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
-              color: "var(--color-ink-soft)", whiteSpace: "nowrap", flexShrink: 0,
-            }}>
-              <span>📅 {dateFormatted}</span>
-              {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
-            </div>
-
-            {/* Tags — second → inline-end */}
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {/* Tags */}
+          {(memory.tags && memory.tags.length > 0 || sharedWith.length > 0) && (
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 10 }}>
               {memory.tags?.map((tagId) => {
                 const tagDef = PREDEFINED_TAGS.find((t) => t.id === tagId);
                 const label = getTagLabel(tagId, language);
                 return (
                   <span key={tagId} style={tagDef
                     ? {
-                        display: "inline-flex", alignItems: "center", gap: 5,
-                        padding: "5px 11px", borderRadius: 99,
-                        fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+                        display: "inline-flex", alignItems: "center", gap: 4,
+                        padding: "4px 9px", borderRadius: 99,
+                        fontFamily: "var(--font-round, sans-serif)", fontSize: 12,
                         background: tagDef.colors.soft, color: tagDef.colors.deep,
                         border: `1.5px solid ${tagDef.colors.mid}`,
                       }
                     : {
-                        display: "inline-flex", alignItems: "center", gap: 5,
-                        padding: "5px 11px", borderRadius: 99,
-                        fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+                        display: "inline-flex", alignItems: "center", gap: 4,
+                        padding: "4px 9px", borderRadius: 99,
+                        fontFamily: "var(--font-round, sans-serif)", fontSize: 12,
                         background: "#F5F5F5", color: "#8E869C", border: "1.5px solid #EFE7DE",
                       }}>
                     {label}
@@ -260,90 +259,41 @@ export function MemoryCard({ memory, kidBirthdate, allKids, onEdit, onDelete }: 
               })}
               {sharedWith.length > 0 && (
                 <span style={{
-                  display: "inline-flex", alignItems: "center", gap: 5,
-                  padding: "5px 11px", borderRadius: 99,
-                  fontFamily: "var(--font-round, sans-serif)", fontSize: 12.5,
+                  display: "inline-flex", alignItems: "center", gap: 4,
+                  padding: "4px 9px", borderRadius: 99,
+                  fontFamily: "var(--font-round, sans-serif)", fontSize: 12,
                   background: "#EDE7FB", color: "#7E5BC9", border: "1.5px solid #CBB8F2",
                 }}>
                   🤝 {t("גם עם", "Also with")} {sharedWith.map((k) => t(k.name_he, k.name_en)).join(", ")}
                 </span>
               )}
             </div>
+          )}
+
+          {/* Footer: date + age */}
+          <div
+            dir={dir}
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between",
+              paddingTop: 8, borderTop: "1px solid var(--color-line)",
+              fontFamily: "var(--font-round, sans-serif)", fontSize: 11.5,
+              color: "var(--color-ink-soft)", gap: 6,
+            }}
+          >
+            <span>{dateFormatted}</span>
+            {ageAtMemory && <span>{t(`גיל ${ageAtMemory}`, `Age ${ageAtMemory}`)}</span>}
           </div>
         </div>
 
-        {/* ── Photo column — SECOND in DOM
-             RTL (Hebrew):  appears on the LEFT  ✓
-             LTR (English): appears on the RIGHT ✓  ── */}
-        {hasPhotos && (
-          <div
-            className="group"
-            style={{ flex: "0 0 190px", position: "relative", overflow: "hidden", cursor: "pointer" }}
-            onClick={() => setLightboxIndex(carouselIndex)}
-          >
-            <Image
-              src={photos[carouselIndex]}
-              alt={`Memory photo ${carouselIndex + 1}`}
-              fill className="object-cover" sizes="190px"
-            />
-
-            {/* Magnifier overlay — tells the user the photo is clickable */}
-            <div className="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center pointer-events-none">
-              <div style={{
-                width: 44, height: 44, borderRadius: "50%",
-                background: "rgba(255,255,255,0.92)",
-                display: "grid", placeItems: "center",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-              }}>
-                <Expand className="w-5 h-5" style={{ color: "#4B4358" }} />
-              </div>
-            </div>
-
-            {/* Carousel controls */}
-            {multi && (
-              <>
-                <button onClick={carouselPrev} style={{
-                  position: "absolute", top: "50%", transform: "translateY(-50%)", left: 6, zIndex: 2,
-                  width: 28, height: 28, borderRadius: "50%", border: "none", cursor: "pointer",
-                  background: "rgba(255,255,255,0.85)", display: "grid", placeItems: "center",
-                  fontSize: 16, color: "rgba(55,45,70,0.8)", boxShadow: "0 1px 5px rgba(0,0,0,0.15)",
-                }}>‹</button>
-                <button onClick={carouselNext} style={{
-                  position: "absolute", top: "50%", transform: "translateY(-50%)", right: 6, zIndex: 2,
-                  width: 28, height: 28, borderRadius: "50%", border: "none", cursor: "pointer",
-                  background: "rgba(255,255,255,0.85)", display: "grid", placeItems: "center",
-                  fontSize: 16, color: "rgba(55,45,70,0.8)", boxShadow: "0 1px 5px rgba(0,0,0,0.15)",
-                }}>›</button>
-                <div style={{
-                  position: "absolute", bottom: 10, left: 0, right: 0,
-                  display: "flex", justifyContent: "center", gap: 5, zIndex: 2,
-                }}>
-                  {photos.map((_, i) => (
-                    <div key={i}
-                      onClick={(e) => { e.stopPropagation(); setCarouselIndex(i); }}
-                      style={{
-                        width: i === carouselIndex ? 8 : 6, height: i === carouselIndex ? 8 : 6,
-                        borderRadius: "50%",
-                        background: i === carouselIndex ? "#fff" : "rgba(255,255,255,0.5)",
-                        cursor: "pointer", transition: "all 0.15s",
-                      }}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-
-          </div>
-        )}
-
-        {/* ── Options / WhatsApp — always visible, inline-end corner of the card
-             RTL (Hebrew): inline-end = LEFT  → sits on the photo side ✓
-             LTR (English): inline-end = RIGHT → sits on the photo side ✓  ── */}
-        <div style={{ position: "absolute", top: 14, insetInlineEnd: 16, zIndex: 5 }}>
+        {/* ── ··· / WhatsApp button — top inline-end corner ── */}
+        <div style={{ position: "absolute", top: 10, insetInlineEnd: 10, zIndex: 5 }}>
           {!isGuest ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button style={btnStyle}>···</button>
+                <button style={{
+                  ...btnStyle,
+                  background: hasPhotos ? "rgba(255,255,255,0.88)" : "var(--color-card)",
+                }}>···</button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {menuItems}

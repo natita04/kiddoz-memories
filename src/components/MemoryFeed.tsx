@@ -302,16 +302,17 @@ export function MemoryFeed({
           )}
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+        <div className="columns-1 sm:columns-2" style={{ columnGap: 12 }}>
           {filtered.map((memory) => (
-            <MemoryCard
-              key={memory.id}
-              memory={memory}
-              kidBirthdate={kidBirthdate}
-              allKids={allKids}
-              onEdit={openEditModal}
-              onDelete={handleDelete}
-            />
+            <div key={memory.id} style={{ breakInside: "avoid", marginBottom: 12 }}>
+              <MemoryCard
+                memory={memory}
+                kidBirthdate={kidBirthdate}
+                allKids={allKids}
+                onEdit={openEditModal}
+                onDelete={handleDelete}
+              />
+            </div>
           ))}
         </div>
       )}
