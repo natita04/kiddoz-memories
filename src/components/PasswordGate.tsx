@@ -101,7 +101,7 @@ export function PasswordGate({
             className="font-display"
             style={{ fontSize: 32, color: "var(--color-ink)", margin: "0 0 8px" }}
           >
-            {isHe ? "זכרונות משפחת רז" : "Memories - Raz Family"}
+            {isHe ? "משפחת רז" : "Raz Family"}
           </h1>
           <p
             className="font-round"

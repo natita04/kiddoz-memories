@@ -314,6 +314,7 @@ export function MemoryFeed({
                 allKids={allKids}
                 onEdit={openEditModal}
                 onDelete={handleDelete}
+                onSaved={handleSaved}
               />
             ))}
           </div>
@@ -334,6 +335,7 @@ export function MemoryFeed({
                     allKids={allKids}
                     onEdit={openEditModal}
                     onDelete={handleDelete}
+                    onSaved={handleSaved}
                   />
                 ))}
               </div>

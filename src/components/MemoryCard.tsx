@@ -2,9 +2,15 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Expand, Pencil, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Expand, Languages, Loader2, Pencil, Trash2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { PREDEFINED_TAGS, getTagLabel } from "@/lib/tags";
 import { getAgeAtDate } from "@/lib/zodiac";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase";
 import type { Kid, Memory } from "@/types";
 
 interface MemoryCardProps {
@@ -23,6 +30,7 @@ interface MemoryCardProps {
   allKids: Kid[];
   onEdit: (memory: Memory) => void;
   onDelete: (id: string) => void;
+  onSaved: (memory: Memory) => void;
 }
 
 /* ─── WhatsApp icon ───────────────────────────────────────── */
@@ -216,8 +224,136 @@ function Lightbox({
   );
 }
 
+/* ─── Fix-translation modal ───────────────────────────────────
+   Edits only the currently-displayed language's text. The other
+   language (the original the user typed) is never touched. */
+function FixTranslationModal({
+  memory, onClose, onSaved,
+}: {
+  memory: Memory;
+  onClose: () => void;
+  onSaved: (memory: Memory) => void;
+}) {
+  const { language, t, dir } = useLanguage();
+  const field = language === "he" ? "story_he" : "story_en";
+  const [text, setText] = useState(memory[field] ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSave() {
+    setSaving(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase
+        .from("memories")
+        .update({ [field]: text.trim() })
+        .eq("id", memory.id)
+        .select()
+        .single();
+      if (error) throw error;
+      onSaved(data as Memory);
+      onClose();
+    } catch (err) {
+      setError(t("שגיאה בשמירה. נסה שוב.", "Failed to save. Please try again."));
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent
+        className="p-0"
+        style={{ maxWidth: 520, borderRadius: 28, boxShadow: "0 20px 60px rgba(75,67,88,0.22)" }}
+      >
+        <DialogHeader style={{ padding: "22px 26px 0" }}>
+          <DialogTitle className="font-display" style={{ margin: 0, fontSize: 22, color: "var(--color-ink)" }}>
+            {t("תיקון תרגום", "Fix translation")}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div style={{ padding: "16px 26px 26px", display: "flex", flexDirection: "column", gap: 16 }} dir={dir}>
+          <p className="font-round" style={{ margin: 0, fontSize: 13.5, color: "var(--color-ink-soft)", lineHeight: 1.5 }}>
+            {t(
+              "עריכת הטקסט בעברית בלבד. הטקסט בשפה המקורית לא ישתנה.",
+              "Editing the English text only. The original-language text won't change."
+            )}
+          </p>
+          <textarea
+            rows={5}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            dir={dir}
+            style={{
+              width: "100%",
+              padding: "13px 16px",
+              borderRadius: 14,
+              fontFamily: "var(--font-sans, Rubik, sans-serif)",
+              fontSize: 15,
+              color: "var(--color-ink)",
+              background: "#FAFAF8",
+              outline: "none",
+              border: "1.5px solid #F7BD9C",
+              boxShadow: "0 0 0 3px #FCE3D5",
+              resize: "none",
+              boxSizing: "border-box",
+              textAlign: dir === "rtl" ? "right" : "left",
+            }}
+            autoFocus
+          />
+
+          {error && <p style={{ fontSize: 14, color: "#DC2626", margin: 0 }}>{error}</p>}
+
+          <div style={{ display: "flex", gap: 12 }}>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || !text.trim()}
+              className="font-round"
+              style={{
+                padding: "12px 28px",
+                borderRadius: 99,
+                border: "none",
+                cursor: saving || !text.trim() ? "not-allowed" : "pointer",
+                background: saving || !text.trim() ? "#F7BD9C" : "#E07F52",
+                color: "#fff",
+                fontSize: 15,
+                boxShadow: "0 6px 16px #F7BD9C",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {saving ? t("שומר...", "Saving...") : t("שמירה", "Save")}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="font-round"
+              style={{
+                padding: "12px 22px",
+                borderRadius: 99,
+                cursor: "pointer",
+                background: "transparent",
+                color: "#8E869C",
+                fontSize: 15,
+                border: "1.5px solid #EFE7DE",
+              }}
+            >
+              {t("ביטול", "Cancel")}
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ─── Card ────────────────────────────────────────────────── */
-export function MemoryCard({ memory, kidId, kidBirthdate, allKids, onEdit, onDelete }: MemoryCardProps) {
+export function MemoryCard({ memory, kidId, kidBirthdate, allKids, onEdit, onDelete, onSaved }: MemoryCardProps) {
   const { language, t, dir } = useLanguage();
   const { isGuest } = useAuth();
   const ageAtMemory = getAgeAtDate(kidBirthdate, memory.memory_date);
@@ -226,8 +362,11 @@ export function MemoryCard({ memory, kidId, kidBirthdate, allKids, onEdit, onDel
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [fixingTranslation, setFixingTranslation] = useState(false);
 
   const story = language === "he" ? memory.story_he ?? memory.story_en : memory.story_en ?? memory.story_he;
+  /* Both languages present → the displayed text is a translation that can be fixed */
+  const hasTranslation = !!memory.story_he && !!memory.story_en;
   const dateFormatted = new Date(memory.memory_date).toLocaleDateString(
     language === "he" ? "he-IL" : "en-US",
     { day: "numeric", month: "long", year: "numeric" }
@@ -275,6 +414,12 @@ export function MemoryCard({ memory, kidId, kidBirthdate, allKids, onEdit, onDel
         <Pencil className="h-4 w-4 me-2" />
         {t("עריכה", "Edit")}
       </DropdownMenuItem>
+      {hasTranslation && (
+        <DropdownMenuItem onClick={() => setFixingTranslation(true)}>
+          <Languages className="h-4 w-4 me-2" />
+          {t("תיקון תרגום", "Fix translation")}
+        </DropdownMenuItem>
+      )}
       <DropdownMenuSeparator />
       <DropdownMenuItem
         onClick={handleDelete}
@@ -453,6 +598,14 @@ export function MemoryCard({ memory, kidId, kidBirthdate, allKids, onEdit, onDel
           kidId={kidId}
           kidBirthdate={kidBirthdate}
           allKids={allKids}
+        />
+      )}
+
+      {fixingTranslation && (
+        <FixTranslationModal
+          memory={memory}
+          onClose={() => setFixingTranslation(false)}
+          onSaved={onSaved}
         />
       )}
     </>
