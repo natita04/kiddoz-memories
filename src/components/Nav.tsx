@@ -171,22 +171,6 @@ export function Nav() {
             );
           })}
 
-          {/* Kid #3 placeholder */}
-          <button
-            disabled
-            className="font-round flex items-center gap-2 px-3 py-1 text-sm cursor-not-allowed"
-            style={{
-              borderRadius: 99,
-              border: "2px dashed var(--color-line)",
-              background: "transparent",
-              color: "var(--color-ink-soft)",
-              opacity: 0.6,
-            }}
-            title={t("הולד/ת בקרוב", "Coming soon")}
-          >
-            <span style={{ fontSize: 15 }}>＋</span>
-            {t("ילד #3", "Kid #3")}
-          </button>
         </nav>
       </div>
     </header>
