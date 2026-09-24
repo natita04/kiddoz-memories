@@ -103,6 +103,31 @@ function StatChip({ label, value, emoji, softColor }: StatChipProps) {
   );
 }
 
+function resizeToJpeg(file: File, maxSize: number): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new window.Image();
+    const src = URL.createObjectURL(file);
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(src);
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("Could not process image"))),
+        "image/jpeg",
+        0.88
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(src);
+      reject(new Error("Unsupported image format (try JPG or PNG)"));
+    };
+    img.src = src;
+  });
+}
+
 export function KidProfile({ kid }: KidProfileProps) {
   const { t, language, dir } = useLanguage();
   const { isGuest } = useAuth();
@@ -128,15 +153,17 @@ export function KidProfile({ kid }: KidProfileProps) {
 
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop();
-      const path = `${kid.slug}.${ext}`;
+      // Shrink to a JPEG so big phone photos fit the bucket's 5MB / mime limits,
+      // and use a fresh filename so no overwrite (UPDATE) permission is needed.
+      const resized = await resizeToJpeg(file, 800);
+      const path = `${kid.slug}-${Date.now()}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(path, file, { upsert: true, cacheControl: "3600" });
+        .upload(path, resized, { contentType: "image/jpeg", cacheControl: "3600" });
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-      const url = `${data.publicUrl}?t=${Date.now()}`;
+      const url = data.publicUrl;
 
       const { error: updateError } = await supabase
         .from("kids")
@@ -147,7 +174,8 @@ export function KidProfile({ kid }: KidProfileProps) {
       setPhotoUrl(url);
     } catch (err) {
       console.error("Photo upload failed:", err);
-      alert(t("העלאת התמונה נכשלה, נסו שוב.", "Photo upload failed, please try again."));
+      const msg = err instanceof Error ? err.message : String((err as { message?: string })?.message ?? err);
+      alert(t(`העלאת התמונה נכשלה: ${msg}`, `Photo upload failed: ${msg}`));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
