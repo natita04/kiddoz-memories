@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Camera, Loader2, Pencil, Expand } from "lucide-react";
 import { KidEditModal } from "@/components/KidEditModal";
 import { useLanguage } from "@/context/LanguageContext";
-import { getAge, getZodiacSign } from "@/lib/zodiac";
+import { getAge, getAgeLabel, getZodiacSign } from "@/lib/zodiac";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
 import { getKidColors } from "@/lib/kidColors";
@@ -113,6 +113,7 @@ export function KidProfile({ kid }: KidProfileProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const age = getAge(kidData.birthdate);
+  const ageLabel = getAgeLabel(kidData.birthdate, kidData.gender);
   const zodiac = getZodiacSign(kidData.birthdate);
   const c = getKidColors(kidData.order);
 
@@ -353,10 +354,7 @@ export function KidProfile({ kid }: KidProfileProps) {
                   className="font-round"
                   style={{ fontSize: 16, color: c.deep }}
                 >
-                  {t(
-                    kidData.gender === "m" ? `בן ${age}` : `בת ${age}`,
-                    `Age ${age}`
-                  )}
+                  {t(ageLabel.he, ageLabel.en)}
                 </span>
               </div>
             </div>
@@ -393,7 +391,11 @@ export function KidProfile({ kid }: KidProfileProps) {
             />
             <StatChip
               label={t("גיל", "Age")}
-              value={t(`${age} שנים`, `${age} years old`)}
+              value={
+                age >= 1
+                  ? t(`${age} שנים`, `${age} years old`)
+                  : t(ageLabel.he.replace(/^(בן|בת) /, ""), ageLabel.en)
+              }
               emoji="🌟"
               softColor={c.soft}
             />

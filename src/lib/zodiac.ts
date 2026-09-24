@@ -43,6 +43,38 @@ export function getAge(birthdate: string): number {
   return age;
 }
 
+// Age label for the profile header. Babies under 1 get days/weeks/months
+// instead of "Age 0".
+export function getAgeLabel(
+  birthdate: string,
+  gender: "m" | "f"
+): { he: string; en: string } {
+  const years = getAge(birthdate);
+  const prefix = gender === "m" ? "בן" : "בת";
+  if (years >= 1) return { he: `${prefix} ${years}`, en: `Age ${years}` };
+
+  const today = new Date();
+  const birth = new Date(birthdate);
+  const days = Math.max(0, Math.floor((today.getTime() - birth.getTime()) / 86400000));
+  let months = (today.getFullYear() - birth.getFullYear()) * 12 + today.getMonth() - birth.getMonth();
+  if (today.getDate() < birth.getDate()) months--;
+
+  if (months >= 1) {
+    return months === 1
+      ? { he: `${prefix} חודש`, en: "1 month old" }
+      : { he: `${prefix} ${months} חודשים`, en: `${months} months old` };
+  }
+  const weeks = Math.floor(days / 7);
+  if (weeks >= 1) {
+    return weeks === 1
+      ? { he: `${prefix} שבוע`, en: "1 week old" }
+      : { he: `${prefix} ${weeks} שבועות`, en: `${weeks} weeks old` };
+  }
+  return days === 1
+    ? { he: `${prefix} יום`, en: "1 day old" }
+    : { he: `${prefix} ${days} ימים`, en: `${days} days old` };
+}
+
 export function isHebrew(text: string): boolean {
   return /[֐-׿]/.test(text);
 }
