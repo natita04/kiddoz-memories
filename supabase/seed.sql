@@ -4,7 +4,7 @@
 -- ================================================
 
 insert into public.kids
-  (name_he, name_en, slug, birthdate, favorite_food_he, favorite_food_en, favorite_color_he, favorite_color_en, "order")
+  (name_he, name_en, slug, birthdate, favorite_food_he, favorite_food_en, favorite_color_he, favorite_color_en, gender, "order")
 values
   (
     'ילד ראשון',    -- ← replace with first kid's Hebrew name
@@ -15,6 +15,7 @@ values
     'Pizza',
     'כחול',
     'Blue',
+    'm',            -- ← 'm' or 'f'
     1
   ),
   (
@@ -26,6 +27,7 @@ values
     'Chocolate',
     'ורוד',
     'Pink',
+    'f',            -- ← 'm' or 'f'
     2
   )
 on conflict (slug) do nothing;

@@ -15,7 +15,8 @@ create table if not exists public.kids (
   favorite_color_he text not null default '',
   favorite_color_en text not null default '',
   profile_photo_url text,                           -- Supabase storage URL
-  "order"         int not null default 0            -- controls tab order
+  gender          text not null default 'm' check (gender in ('m', 'f')),
+  "order"         int not null default 0            -- controls tab order + color
 );
 
 -- Memories table
@@ -27,11 +28,18 @@ create table if not exists public.memories (
   memory_date  date not null default current_date,  -- user-set date of the memory
   created_at   timestamptz not null default now(),  -- server timestamp
   photos       text[] not null default '{}',        -- array of Supabase storage URLs
+  tags         text[] not null default '{}',        -- predefined tag ids or custom text
+  shared_kid_ids uuid[] not null default '{}',      -- other kids this memory is "together with"
   constraint memories_has_story check (story_he is not null or story_en is not null)
 );
 
 create index if not exists memories_kid_date_idx
   on public.memories (kid_id, memory_date desc);
+
+-- Columns added after the first version. Safe to re-run on an existing DB.
+alter table public.kids     add column if not exists gender text not null default 'm';
+alter table public.memories add column if not exists tags text[] not null default '{}';
+alter table public.memories add column if not exists shared_kid_ids uuid[] not null default '{}';
 
 -- ================================================
 -- Storage buckets
