@@ -147,6 +147,7 @@ export function KidProfile({ kid }: KidProfileProps) {
       setPhotoUrl(url);
     } catch (err) {
       console.error("Photo upload failed:", err);
+      alert(t("העלאת התמונה נכשלה, נסו שוב.", "Photo upload failed, please try again."));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -252,14 +253,17 @@ export function KidProfile({ kid }: KidProfileProps) {
                   transform: "rotate(-3deg)",
                   boxShadow: `0 0 0 5px #fff, 0 0 0 9px ${c.mid}`,
                   flexShrink: 0,
+                  cursor: isGuest ? "default" : "pointer",
                 }}
+                onClick={() => !isGuest && fileInputRef.current?.click()}
+                title={isGuest ? undefined : t("הוספת תמונה", "Add photo")}
               >
                 {kid.gender === "m" ? "👦" : "👧"}
               </div>
             )}
 
             {/* Hover actions */}
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1">
               {!isGuest && (
                 <button
                   onClick={() => fileInputRef.current?.click()}
